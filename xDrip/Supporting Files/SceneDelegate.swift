@@ -2,21 +2,43 @@
 //  SceneDelegate.swift
 //  xdrip
 //
-//  Created by Paul Plant on 17/10/25.
-//  Copyright © 2025 Johan Degraeve. All rights reserved.
-//
 
 import UIKit
 
-// added to fix the "UIScene lifecycle will soon be required. Failure to adopt will result in an assert in the future." debugger warning since iOS26/Xcode26
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()
+
+        let rootVC = UIStoryboard(name: "Main", bundle: nil)
+            .instantiateInitialViewController()!
+
+        window.rootViewController = rootVC
         self.window = window
         window.makeKeyAndVisible()
+
+        // ---- عرض شاشة البريد عند أول تشغيل ----
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            //UserDefaults.standard.removeObject(forKey: "userEmail")
+
+            let savedEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
+
+            if savedEmail.isEmpty {
+                let popup = EmailPopupViewController()
+                popup.modalPresentationStyle = .formSheet
+
+                popup.onSubmit = { email in
+                    UserDefaults.standard.set(email, forKey: "userEmail")
+                    sendEmailToServer(email: email)
+                }
+
+                rootVC.present(popup, animated: true)
+            }
+        }
     }
 }
