@@ -1,6 +1,6 @@
 import UIKit
 
-class EmailPopupViewController: UIViewController {
+class EmailPopupViewController: UIViewController, UITextFieldDelegate {
 
     private let containerView: UIView = {
         let view = UIView()
@@ -64,22 +64,30 @@ class EmailPopupViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        emailField.delegate = self
+        
+        // Gesture واحد فقط لإغلاق الكيبورد
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tap)
+
         setupBackground()
         setupLayout()
         submitButton.addTarget(self, action: #selector(submitPressed), for: .touchUpInside)
     }
 
-    private func setupBackground() {
-        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-
-        // إغلاق النافذة بالنقر على الخلفية
-        let tap = UITapGestureRecognizer(target: self, action: #selector(backgroundTapped))
-        view.addGestureRecognizer(tap)
+    // إخفاء الكيبورد عند الضغط على Return
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 
-    @objc private func backgroundTapped() {
-        // يمكنك السماح بالإغلاق بالنقر على الخلفية
-        // dismiss(animated: true)
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    private func setupBackground() {
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
     }
 
     private func setupLayout() {
@@ -92,7 +100,13 @@ class EmailPopupViewController: UIViewController {
             containerView.widthAnchor.constraint(equalToConstant: 320)
         ])
 
-        let stack = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel, emailField, errorLabel, submitButton])
+        let stack = UIStackView(arrangedSubviews: [
+            titleLabel,
+            descriptionLabel,
+            emailField,
+            errorLabel,
+            submitButton
+        ])
         stack.axis = .vertical
         stack.spacing = 12
         stack.translatesAutoresizingMaskIntoConstraints = false

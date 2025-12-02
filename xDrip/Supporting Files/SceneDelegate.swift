@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // ---- عرض شاشة البريد عند أول تشغيل ----
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            //UserDefaults.standard.removeObject(forKey: "userEmail")
+           // UserDefaults.standard.removeObject(forKey: "userEmail")
 
             let savedEmail = UserDefaults.standard.string(forKey: "userEmail") ?? ""
 
