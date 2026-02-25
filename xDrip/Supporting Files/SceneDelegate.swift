@@ -7,6 +7,9 @@ import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    
+    /// the quickActionsManager instance needed to process the shortcut items received
+    private let quickActionsManager = QuickActionsManager()
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,

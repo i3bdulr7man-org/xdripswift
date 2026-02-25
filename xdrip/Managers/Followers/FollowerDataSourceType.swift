@@ -40,6 +40,7 @@ public enum FollowerDataSourceType: Int, CaseIterable {
     case libreLinkUp = 1
     case libreLinkUpRussia = 2
     case dexcomShare = 3
+    case medtrumEasyView = 4
 
     /// All cases filtered to those currently enabled. Prefer this over 'allCases' when populating UI.
     static var allEnabledCases: [FollowerDataSourceType] {
@@ -70,6 +71,8 @@ public enum FollowerDataSourceType: Int, CaseIterable {
             return "LibreLinkUp Russia"
         case .dexcomShare:
             return "Dexcom Share"
+        case .medtrumEasyView:
+            return "Medtrum EasyView"
         }
     }
     
@@ -85,6 +88,8 @@ public enum FollowerDataSourceType: Int, CaseIterable {
             return "LibreLinkUp Russia"
         case .dexcomShare:
             return "Dexcom Share"
+        case .medtrumEasyView:
+            return "Medtrum EasyView"
         }
     }
     
@@ -96,6 +101,8 @@ public enum FollowerDataSourceType: Int, CaseIterable {
             return "LL"
         case .dexcomShare:
             return "DS"
+        case .medtrumEasyView:
+            return "ME"
         }
     }
     
@@ -107,6 +114,8 @@ public enum FollowerDataSourceType: Int, CaseIterable {
             return ConstantsFollower.secondsUntilFollowerDisconnectWarningLibreLinkUp
         case .dexcomShare:
             return ConstantsFollower.secondsUntilFollowerDisconnectWarningDexcomShare
+        case .medtrumEasyView:
+            return ConstantsFollower.secondsUntilFollowerDisconnectWarningMedtrumEasyView
         }
     }
 
@@ -115,7 +124,7 @@ public enum FollowerDataSourceType: Int, CaseIterable {
         switch self {
         case .nightscout:
             return false
-        case .libreLinkUp, .libreLinkUpRussia, .dexcomShare:
+        case .libreLinkUp, .libreLinkUpRussia, .dexcomShare, .medtrumEasyView:
             return true
         }
     }
@@ -131,7 +140,46 @@ public enum FollowerDataSourceType: Int, CaseIterable {
             return "LibreLinkUp Russia Follower"
         case .dexcomShare:
             return "Dexcom Share Follower"
+        case .medtrumEasyView:
+            return "Medtrum EasyView Follower"
         }
     }
     
+    func hasServiceStatus() -> Bool {
+        switch self {
+        case .nightscout, .libreLinkUp, .libreLinkUpRussia, .dexcomShare:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    // as an enum should be a simple value type without access to UserDefaults or app data,
+    // we use a workaround to pass the Nightscout URL to the function and then return it
+    func serviceStatusBaseUrlString(nightscoutUrl: String? = "") -> String {
+        switch self {
+        case .nightscout:
+            return nightscoutUrl ?? ""
+        case .dexcomShare:
+            return ConstantsFollower.followerStatusDexcomBaseUrl
+        case .libreLinkUp, .libreLinkUpRussia:
+            return ConstantsFollower.followerStatusAbbottBaseUrl
+        default:
+            return ""
+        }
+    }
+    
+    func serviceStatusApiPathString() -> String {
+        switch self {
+        case .nightscout:
+            // for Nightscout, just use the basic status response from v1
+            return ConstantsFollower.followerStatusNightscoutApiPath
+        case .dexcomShare, .libreLinkUp, .libreLinkUpRussia:
+            // both Dexcom and Abbott use Atlassian Statuspage to show
+            // their service status so the API path is common and public
+            return ConstantsFollower.followerStatusAtlassianApiPath
+        default:
+            return ""
+        }
+    }
 }

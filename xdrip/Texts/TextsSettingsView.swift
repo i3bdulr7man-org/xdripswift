@@ -89,7 +89,7 @@ class Texts_SettingsView {
     }()
     
     static let labelFollowerDataSourceType: String = {
-        return NSLocalizedString("settingsviews_labelFollowerDataSourceType", tableName: filename, bundle: Bundle.main, value: "Follower Data Source", comment: "data source settings, data source")
+        return NSLocalizedString("settingsviews_labelFollowerDataSourceType", tableName: filename, bundle: Bundle.main, value: "Data Source", comment: "data source settings, data source")
     }()
     
     static let labelUploadDataToNightscout: String = {
@@ -140,6 +140,10 @@ class Texts_SettingsView {
         return NSLocalizedString("settingsviews_followerPatientNameMessage", tableName: filename, bundle: Bundle.main, value: "Here you can optionally write the name of the person you are following.", comment: "data source settings, ask the user to enter the name of the person we are following if they want to")
     }()
     
+    static let followerServiceStatus: String = {
+        return NSLocalizedString("settingsviews_followerServiceStatus", tableName: filename, bundle: Bundle.main, value: "Status", comment: "data source settings, the status of the web follower service")
+    }()
+    
     static let nightscoutNotEnabled: String = {
         return NSLocalizedString("settingsviews_nightscoutNotEnabled", tableName: filename, bundle: Bundle.main, value: "Nightscout is disabled\n\nTo upload BG values to Nightscout, you must enable it in the Nightscout section.", comment: "data source settings, enable Nightscout in the Nightscout section")
     }()
@@ -172,6 +176,18 @@ class Texts_SettingsView {
     
     static let libreLinkUpNoActiveSensor = {
         return NSLocalizedString("settingsviews_libreLinkUpNoActiveSensor", tableName: filename, bundle: Bundle.main, value: "No active sensor data", comment: "libre link up follower settings, no active sensor")
+    }()
+    
+    static let medtrumSelectedPatient = {
+        return NSLocalizedString("settingsviews_medtrumSelectedPatient", tableName: filename, bundle: Bundle.main, value: "Selected Patient", comment: "medtrum follower settings, select a patient from the list")
+    }()
+    
+    static let medtrumSelectPatient = {
+        return NSLocalizedString("settingsviews_medtrumSelectPatient", tableName: filename, bundle: Bundle.main, value: "Select Patient", comment: "medtrum follower settings, select a patient")
+    }()
+    
+    static let medtrumSelectPatientFromList = {
+        return NSLocalizedString("settingsviews_medtrumSelectPatientFromList", tableName: filename, bundle: Bundle.main, value: "Select Patient From List", comment: "medtrum follower settings, choose a patient from the list")
     }()
     
     // MARK: - Section Notifications
@@ -358,7 +374,7 @@ class Texts_SettingsView {
     }()
     
     static let heartbeatLibreMessage:String = {
-        return NSLocalizedString("settingsviews_heartbeatLibreMessage", tableName: filename, bundle: Bundle.main, value: "IMPORTANT: You MUST force-close the Libre app first if adding a Libre heartbeat.\n\nEnter the device name shown in the iPhone Settings -> Bluetooth devices list.\n\nOnce you have connected, you can reopen the Libre app if needed.", comment: "transmitter settings, instructions for adding a generic or Libre heartbeat")
+        return NSLocalizedString("settingsviews_heartbeatLibreMessage", tableName: filename, bundle: Bundle.main, value: "IMPORTANT: You MUST force-close the master app (LibreLink, Medtrum, etc.) first before adding the heartbeat.\n\nEnter the device name shown in the iPhone Settings -> Bluetooth devices list.\n\nOnce you have connected, you can reopen the master app if needed.", comment: "transmitter settings, instructions for adding a generic or Libre heartbeat")
     }()
     
     static let heartbeatG7Message:String = {
@@ -717,15 +733,11 @@ class Texts_SettingsView {
     }()
     
     static let infoCalendarAccessDeniedByUser: String = {
-        return String(format: NSLocalizedString("infoCalendarAccessDeniedByUser", tableName: filename, bundle: Bundle.main, value: "You previously denied access to your calendars.\n\nGo to iPhone Settings > %@ > Calendars and enable full access.", comment: "If user has earlier denied access to calendar, and then tries to activate creation of events in calendar, this message will be shown"), ConstantsHomeView.applicationName)
-    }()
-
-    static let infoContactsAccessDeniedByUser: String = {
-        return String(format: NSLocalizedString("infoContactsAccessDeniedByUser", tableName: filename, bundle: Bundle.main, value: "You previously denied access to your contacts.\n\nGo to iPhone Settings > %@ > Contacts and enable full access.", comment: "If user has earlier denied access to contacts, and then tries to activate the contact image, this message will be shown"), ConstantsHomeView.applicationName)
+        return String(format: NSLocalizedString("infoCalendarAccessDeniedByUser", tableName: filename, bundle: Bundle.main, value: "Full Access is required to your contacts.\n\nGo to iPhone Settings > Apps > %@ > Contacts and enable Full Access.", comment: "If user has earlier denied access to calendar, and then tries to activate creation of events in calendar, this message will be shown"), ConstantsHomeView.applicationName)
     }()
     
     static let infoCalendarAccessWriteOnly: String = {
-        return String(format: NSLocalizedString("infoCalendarAccessWriteOnly", tableName: filename, bundle: Bundle.main, value: "You cannot use Calendar Events until you update the calendar access permission from 'Add Events Only' to 'Full Access'.\n\nGo to iPhone Settings > %@ > Calendars and select 'Full Access'.", comment: "The user needs to update their calendar permissions"), ConstantsHomeView.applicationName)
+        return String(format: NSLocalizedString("infoCalendarAccessWriteOnly", tableName: filename, bundle: Bundle.main, value: "You cannot use Calendar Events until you update the calendar access permission from 'Add Events Only' to 'Full Access'.\n\nGo to iPhone Settings > Apps > %@ > Calendars and select 'Full Access'.", comment: "The user needs to update their calendar permissions"), ConstantsHomeView.applicationName)
     }()
     
     static let infoCalendarAccessRestricted: String = {
@@ -746,12 +758,20 @@ class Texts_SettingsView {
         
     // MARK: - Contact image
     
+    static let infoContactsKeepAliveDisabled: String = {
+        return String(format: NSLocalizedString("settingsviews_infoContactsKeepAliveDisabled", tableName: filename, bundle: Bundle.main, value: "You are using Follower mode with background keep-alive disabled.\n\nContact Image function cannot work without a background keep-alive.", comment: "If user is in follower mode with background keep-alive disabled, show this message when they tap the row"), ConstantsHomeView.applicationName)
+    }()
+    
+    static let infoContactsAccessDeniedByUser: String = {
+        return String(format: NSLocalizedString("infoContactsAccessDeniedByUser", tableName: filename, bundle: Bundle.main, value: "Full Access is required to your contacts.\n\nGo to iPhone Settings > Apps > %@ > Contacts and enable Full Access.", comment: "If user has earlier denied full access to contacts, and then tries to activate the contact image, this message will be shown"), ConstantsHomeView.applicationName)
+    }()
+    
     static let infoContactsAccessRestricted: String = {
         return String(format: NSLocalizedString("settingsviews_infoContactsAccessRestricted", tableName: filename, bundle: Bundle.main, value: "You cannot give authorization to %@ to access your contacts. This is possibly due to active restrictions such as parental controls being in place.", comment: "If user is not allowed to give any app access to the Contacts, due to restrictions. And then tries to activate the contact image, this message will be shown"), ConstantsHomeView.applicationName)
     }()
     
     static let infoContactsAccessLimited: String = {
-        return String(format: NSLocalizedString("settingsviews_infoContactsAccessLimited", tableName: filename, bundle: Bundle.main, value: "Only limited access has been given to %@ to access your contacts. Please change the permission to Full Access in the iPhone Settings", comment: "If user has only given limited access to the Contacts and then tries to activate the contact image, this message will be shown"), ConstantsHomeView.applicationName)
+        return String(format: NSLocalizedString("settingsviews_infoContactsAccessLimited", tableName: filename, bundle: Bundle.main, value: "Only limited access has been given to access your contacts.\n\nGo to iPhone Settings > Apps > %@ > Contacts and enable Full Access.", comment: "If user has only given limited access to the Contacts and then tries to activate the contact image, this message will be shown"), ConstantsHomeView.applicationName)
     }()
     
     static let contactImageSectionTitle: String = {
