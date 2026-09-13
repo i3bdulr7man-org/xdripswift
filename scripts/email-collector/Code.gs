@@ -23,7 +23,7 @@ var REPLAY_WINDOW_SECONDS = 600;
 var MAX_REQUESTS_PER_MINUTE = 10;
 
 // معرّف Google Sheet الذي تُلحق به الصفوف
-var SPREADSHEET_ID = 'PASTE_YOUR_SPREADSHEET_ID_HERE';
+var SPREADSHEET_ID = '1jsryn7HA8QiBbw50sKhURt0Bfgy63SMSXHQkd4VL-5M';
 
 function doPost(e) {
   try {
