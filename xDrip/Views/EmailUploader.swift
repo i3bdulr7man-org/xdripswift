@@ -6,14 +6,12 @@ import Foundation
 /// لماذا التوقيع داخل جسم الطلب وليس ترويسة HTTP؟ لأن مشغلات الويب في
 /// Apps Script لا تعرض ترويسات الطلب للسكربت، فلا يمكن التحقق منها خادميًا.
 ///
-/// ⚠️ هام: نقطة النهاية والسر القديمان مكشوفان في تاريخ git.
-/// بعد تدوير النشر (Deploy > New deployment) في Google:
-/// 1. حدّث `endpoint` أدناه بالرابط الجديد.
-/// 2. حدّث `sharedSecret` بالقيمة نفسها الموجودة في scripts/email-collector/Code.gs
+/// تم التدوير 2026-09-14: النشر القديم المكشوف في تاريخ git أُرشف (يرجع 404)
+/// وهذا هو النشر الجديد المُختبَر. السر المشترك يجب أن يطابق SHARED_SECRET في
+/// scripts/email-collector/Code.gs عند أي تغيير مستقبلي.
 enum EmailUploader {
 
-    /// TODO(تدوير): استبدل بالرابط الجديد بعد إنشاء نشر جديد في Google Apps Script
-    private static let endpoint = URL(string: "https://script.google.com/macros/s/AKfycbzgZ1M8K8UmUmDA02ySvW6MK8glYvDc0lSD71C0j0hlpbwIYBQRZUa5_kLQ2tJqkMFz4A/exec")!
+    private static let endpoint = URL(string: "https://script.google.com/macros/s/AKfycbxR55EXmUIgsnK9EcaZxHjARL8gUpdLnT1PwHSjcf6AOvZXyOTCeaUsLAEjstpP-EjiQA/exec")!
 
     /// سر مشترك مع سكربت Google — يجب أن يطابق SHARED_SECRET في scripts/email-collector/Code.gs
     private static let sharedSecret = SymmetricKey(data: Data("0a371d7e7fd3fdee6fd23724246d621740c0bab0bab8c2a30fd0ac443c795c7f".utf8))
