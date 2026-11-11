@@ -30,7 +30,7 @@ class LibreLinkUpFollowManager: NSObject {
     /// delegate to pass back glucosedata
     private(set) weak var followerDelegate: FollowerDelegate?
 
-    /// The root-owned shared keep-alive engine; this follower reports operational state only and
+    /// The root-owned shared keep-alive engine. This follower reports operational state only and
     /// does not own silent-audio playback, replay timing, or application lifecycle callbacks.
     private let backgroundKeepAliveManager: FollowerBackgroundKeepAliveManaging
 
@@ -96,7 +96,8 @@ class LibreLinkUpFollowManager: NSObject {
         self.libreLinkUpId = nil
         self.libreLinkUpPatientId = nil
         
-        // run a quick check to see if the LibreLinkUp version stored in the constants file is newer than the one currently stored in the app. If it is, then update it. This will only happen if the user hasn't manually updated it before a new xDrip4iOS version is released.
+        // Promote the working version when this release ships a numerically newer default. Keep a
+        // stored value that is already equal or higher so a newer manual override is not downgraded.
         if ConstantsLibreLinkUp.libreLinkUpVersionDefault.compare(UserDefaults.standard.libreLinkUpVersion ?? "0.0.0", options: .numeric) == .orderedDescending {
             trace("in init, updating userdefaults LibreLinkUp version from '%{public}@' to '%{public}@", log: self.log, category: ConstantsLog.categoryLibreLinkUpFollowManager, type: .info, UserDefaults.standard.libreLinkUpVersion ?? "nil", ConstantsLibreLinkUp.libreLinkUpVersionDefault)
             
@@ -136,6 +137,7 @@ class LibreLinkUpFollowManager: NSObject {
     }
 
     public func logOut() {
+        resetActiveSensorData()
         let source = TroubleshootingLogSource(UserDefaults.standard.followerDataSourceType)
         trace(
             "LibreLinkUp logged out",
@@ -269,11 +271,13 @@ class LibreLinkUpFollowManager: NSObject {
                     guard let patientId = self.libreLinkUpPatientId else { return }
                     
                     // at this stage, we've now got a valid authentication token and we know the patientId we need to follow
+                    let expirySourceAtRequest = SensorExpirySnapshot.currentSource()
                     let graphResponse = try await requestGraph(patientId: patientId)
-                    guard !UserDefaults.standard.libreLinkUpManuallyLoggedOut else {
-                        self.resetAuthenticationState()
-                        return
-                    }
+                    // Ignore responses from an account or source that is no longer selected.
+                    guard !UserDefaults.standard.isMaster,
+                          expirySourceAtRequest == SensorExpirySnapshot.currentSource(),
+                          patientId == self.libreLinkUpPatientId,
+                          !UserDefaults.standard.libreLinkUpManuallyLoggedOut else { return }
                     
                     // before processing the glucoseMeasurement values, let's set up the sensor info in coredata so that we can show it to the user in the settings screen
                     // starting with LLU 4.12.0 this data sometimes isn't sent for some users so we'll try and use it if available and if not, just try to get it from the data.connection and if not, just continue as normal without throwing an error
@@ -286,7 +290,7 @@ class LibreLinkUpFollowManager: NSObject {
                     } else {
                         // this will only happen if the account doesn't have an active sensor connected
                         // reset the data just in case it was previously stored
-                        self.resetActiveSensorData()
+                        self.resetActiveSensorData(invalidateExpiry: false)
                         
                         // for some reason no active sensor data was sent by the server. This seems to sometimes happen since LLU v4.12.0 for some users and for some (unknown) reason.
                         // instead of throwing an error, we'll just continue as normal and hide later (in the UI) the sensor information
@@ -344,6 +348,13 @@ class LibreLinkUpFollowManager: NSObject {
         UserDefaults.standard.activeSensorSerialNumber = serialNumber
         UserDefaults.standard.activeSensorStartDate = Date(timeIntervalSince1970: startDateAsDouble)
         UserDefaults.standard.activeSensorMaxSensorAgeInDays = UserDefaults.standard.libreLinkUpIs15DaySensor ? ConstantsLibreLinkUp.libreLinkUpMaxSensorAgeInDaysLibrePlus : ConstantsLibreLinkUp.libreLinkUpMaxSensorAgeInDays
+
+        if let source = SensorExpirySnapshot.currentSource(), let patientID = libreLinkUpPatientId {
+            let snapshot = SensorExpirySnapshot(source: source, sessionID: patientID + "|" + serialNumber,
+                startDate: Date(timeIntervalSince1970: startDateAsDouble),
+                lifetimeDays: UserDefaults.standard.libreLinkUpIs15DaySensor ? ConstantsLibreLinkUp.libreLinkUpMaxSensorAgeInDaysLibrePlus : ConstantsLibreLinkUp.libreLinkUpMaxSensorAgeInDays)
+            publishSensorExpirySnapshot(snapshot, source: source)
+        }
         
         var activeSensorDescription = ""
         
@@ -666,11 +677,23 @@ class LibreLinkUpFollowManager: NSObject {
     }
     
     /// clear the active sensor data from coredata (needed for UI)
-    private func resetActiveSensorData() {
+    private func resetActiveSensorData(invalidateExpiry: Bool = true) {
+        if invalidateExpiry, !UserDefaults.standard.isMaster, let source = SensorExpirySnapshot.currentSource() {
+            publishSensorExpirySnapshot(nil, source: source)
+        }
         UserDefaults.standard.activeSensorSerialNumber = nil
         UserDefaults.standard.activeSensorStartDate = nil
         UserDefaults.standard.activeSensorMaxSensorAgeInDays = nil
         UserDefaults.standard.libreLinkUpCountry = nil
+    }
+
+    /// Publish the sensor details together. Missing metadata does not confirm a sensor stop.
+    private func publishSensorExpirySnapshot(_ snapshot: SensorExpirySnapshot?, source: String) {
+        var info: [String: Any] = [SensorExpiryReminderManager.sourceKey: source]
+        if let snapshot { info[SensorExpiryReminderManager.snapshotKey] = snapshot }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: SensorExpiryReminderManager.snapshotChanged, object: nil, userInfo: info)
+        }
     }
 
     private func resetAuthenticationState() {

@@ -28,6 +28,7 @@ struct WatchStatus: WatchPayload {
     var highLimitInMgDl: Double = 170
     var urgentHighLimitInMgDl: Double = 250
     var activeSensorDescription: String?
+    var phoneBLECollectionPaused: Bool = false
     var sensorAgeInMinutes: Double = 0
     var sensorMaxAgeInMinutes: Double = 0
     var preferSensorCountdown: Bool = false
@@ -43,6 +44,7 @@ struct WatchStatus: WatchPayload {
     var keepAliveIsDisabled: Bool = false
 
     var aidStatus: AIDStatus?
+    var therapyMetrics: TherapyMetricsSnapshot? = nil
 }
 
 /// current BG chart data used to manage watch views

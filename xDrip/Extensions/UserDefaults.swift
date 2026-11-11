@@ -101,8 +101,17 @@ extension UserDefaults {
         case careLinkPassword = "careLinkPassword"
         /// Non-secret CareLink environment selected explicitly or inferred on first use.
         case careLinkRegion = "careLinkRegion"
+        /// Last proven device clock offsets scoped to region, account and patient.
+        case careLinkDeviceOffsets = "careLinkDeviceOffsets"
         /// Non-secret stable identifier for the personal CareLink account represented as a patient.
         case careLinkSelectedPatientID = "careLinkSelectedPatientID"
+        /// Store-wide historical repair completed and saved successfully.
+        case careLinkTimestampRepairCompleted = "careLinkTimestampRepairCompleted"
+        case careLinkHistoryRestoreGeneration = "careLinkHistoryRestoreGeneration"
+        /// Corroborated patient namespaces used to deduplicate future imports.
+        case careLinkPatientAliases = "careLinkPatientAliases"
+        /// CarePartner mobile app version used for discovery and data requests.
+        case careLinkVersion = "careLinkVersion"
         /// Flag indicating if the last connections fetch failed (to show error in UI)
         case medtrumEasyViewConnectionsFetchFailed = "medtrumEasyViewConnectionsFetchFailed"
 
@@ -118,10 +127,13 @@ extension UserDefaults {
         case multipleAppBadgeValueWith10 = "multipleAppBadgeValueWith10"
         /// minimum time between two notifications, set by user
         case notificationInterval = "notificationInterval"
-        /// which type of live activities should be shown, if any?
+        /// should live activities be enabled independently of the selected style?
+        case liveActivitiesEnabled = "liveActivitiesEnabled"
+        /// which style should be remembered whilst live activities are disabled?
         case liveActivityType = "liveActivityType"
         /// which layout should the small Live Activity family use?
         case carPlayLiveActivityType = "carPlayLiveActivityType"
+        case liveActivityShowIOBCOB = "liveActivityShowIOBCOB"
         /// should BG adjustment be enabled?
         case enableAdjustment = "enableAdjustment"
         /// should BG smoothing be enabled?
@@ -149,6 +161,8 @@ extension UserDefaults {
 
         /// should the screen/chart be allowed to rotate?
         case showMiniChart = "showMiniChart"
+        /// Anchor basal to the top of the main chart.
+        case renderBasalDownwards = "renderBasalDownwards"
         /// hours to show on the mini-chart?
         case miniChartHoursToShow = "miniChartHoursToShow"
         /// should the screen/chart be allowed to rotate?
@@ -192,6 +206,10 @@ extension UserDefaults {
         case automaticBasalRenderingStyle = "automaticBasalRenderingStyle"
         /// micro-bolus threshold level in units
         case smallBolusTreatmentThreshold = "smallBolusTreatmentThreshold"
+        /// carb chart label threshold in grams
+        case smallCarbTreatmentThreshold = "smallCarbTreatmentThreshold"
+        /// use larger minimum chart markers and narrower dose ranges
+        case useSmallDoseTreatmentScale = "useSmallDoseTreatmentScale"
         /// should the micro-boluses be listed in the treatment list/table?
         case showSmallBolusTreatmentsInList = "showSmallBolusTreatmentsInList"
         /// should the normal boluses be listed in the treatment list/table?
@@ -204,6 +222,12 @@ extension UserDefaults {
         case showBgCheckTreatmentsInList = "showBgCheckTreatmentsInList"
         /// should the notes be listed in the treatment list/table?
         case showNoteTreatmentsInList = "showNoteTreatmentsInList"
+        /// should basal injections be listed independently of notes and pump basal?
+        case showBasalInjectionTreatmentsInList = "showBasalInjectionTreatmentsInList"
+        /// last saved whole-unit dose used to prefill a new basal injection
+        case lastBasalInjectionUnits = "lastBasalInjectionUnits"
+        /// last saved insulin type used to prefill a new basal injection
+        case lastBasalInjectionInsulinDescription = "lastBasalInjectionInsulinDescription"
         /// override the default canula age value (CAGE = time since site change)?
         case CAGEMaxHours = "CAGEMaxHours"
 
@@ -213,7 +237,9 @@ extension UserDefaults {
         case showStatistics = "showStatistics"
         /// show the objective lines in color or grey?
         case daysToUseStatistics = "daysToUseStatistics"
-        /// use IFCC way to show A1C?
+        /// Use estimated HbA1c instead of GMI in on-screen statistics. Defaults to false.
+        case statisticsUseHbA1c = "statisticsUseHbA1c"
+        /// Display GMI or estimated HbA1c in IFCC units; retain the original persisted key.
         case useIFCCA1C = "useIFCCA1C"
         /// which type of TIR calculation is selected?
         case timeInRangeType = "timeInRangeType"
@@ -277,14 +303,14 @@ extension UserDefaults {
         case activeSensorTransmitterId = "activeSensorTransmitterId"
         /// active sensor description
         case activeSensorDescription = "activeSensorDescription"
+        /// confirmed local Dexcom session identity (runtime-only)
+        case dexcomSensorSessionIdentityData = "dexcomSensorSessionIdentityData"
         /// active sensor start date
         case activeSensorStartDate = "activeSensorStartDate"
         /// active sensor max days (lifetime)
         case activeSensorMaxSensorAgeInDays = "activeSensorMaxSensorAgeInDays"
         /// overriden active sensor max days (lifetime) - only used for G6 Anubis transmitters
         case activeSensorMaxSensorAgeInDaysOverridenAnubis = "activeSensorMaxSensorAgeInDaysOverridenAnubis"
-        /// should we force a 15 day sensor max days for G7 sensors?
-        case is15DayDexcomG7 = "is15DayDexcomG7"
 
 
         // Transmitter
@@ -374,10 +400,15 @@ extension UserDefaults {
 
         /// speak readings
         case speakReadings = "speakReadings"
+        case speakReadingsScheduleEnabled = "speakReadingsScheduleEnabled"
+        case speakReadingsStartMinute = "speakReadingsStartMinute"
+        case speakReadingsEndMinute = "speakReadingsEndMinute"
         /// speak reading language
         case speakReadingLanguageCode = "speakReadingLanguageCode"
         /// speak delta
         case speakDelta = "speakDelta"
+        /// speak the opening phrase
+        case speakIntroduction = "speakIntroduction"
         /// speak trend
         case speakTrend = "speakTrend"
         /// speak interval
@@ -400,19 +431,6 @@ extension UserDefaults {
         case m5StackTextColor = "m5StackTextColor"
         /// M5Stack background color
         case m5StackBackGroundColor = "m5StackBackGroundColor"
-        /// name of wifi 1 to be configured in M5Stack
-        case m5StackWiFiName1 = "m5StackWiFiName1"
-        /// name of wifi 2 to be configured in M5Stack
-        case m5StackWiFiName2 = "m5StackWiFiName2"
-        /// name of wifi 3 to be configured in M5Stack
-        case m5StackWiFiName3 = "m5StackWiFiName3"
-        /// Password of wifi 1 to be configured in M5Stack
-        case m5StackWiFiPassword1 = "m5StackWiFiPassword1"
-        /// Password of wifi 2 to be configured in M5Stack
-        case m5StackWiFiPassword2 = "m5StackWiFiPassword2"
-        /// Password of wifi 3 to be configured in M5Stack
-        case m5StackWiFiPassword3 = "m5StackWiFiPassword3"
-
         // Apple Watch
 
         /// how often to request a complication update while the Watch app is in the background
@@ -559,6 +577,12 @@ extension UserDefaults {
         case storeFrequentReadingsInNightscout = "storeFrequentReadingsInNightscout"
         /// did user authorize the storage of "frequent" readings in healthkit or not (i.e. every 60 seconds instead of every 5 minutes)
         case storeFrequentReadingsInHealthKit = "storeFrequentReadingsInHealthKit"
+        /// should a pre-v28 G7 connection use the Dexcom app's authenticated connection?
+        case dexcomG7UseOtherApp = "dexcomG7UseOtherApp"
+        /// four-digit applicator code required for G7 primary authentication
+        case dexcomG7PairingCode = "dexcomG7PairingCode"
+        /// G7 primary authentication role, stored per transmitter
+        case dexcomG7BluetoothSlot = "dexcomG7BluetoothSlot"
         /// to create artificial delay in readings stored in sharedUserDefaults for loop. Minutes.
         /// Default value 0, if used then recommended value is multiple of 5 (eg 5 ot 10)
         case loopDelaySchedule = "loopDelaySchedule"
@@ -711,6 +735,36 @@ extension UserDefaults {
     @objc dynamic var careLinkSelectedPatientID: String? {
         get { string(forKey: Key.careLinkSelectedPatientID.rawValue) }
         set { set(newValue, forKey: Key.careLinkSelectedPatientID.rawValue) }
+    }
+
+    /// Missing clock information must not discard a previously proven offset, including zero.
+    func careLinkDeviceOffset(region: CareLinkRegion, account: String?, patientID: String) -> TimeInterval? {
+        guard let account, !account.isEmpty else { return nil }
+        let offsets = dictionary(forKey: Key.careLinkDeviceOffsets.rawValue) as? [String: [String: [String: Double]]]
+        guard let offset = offsets?[region.rawValue]?[account]?[patientID],
+              offset.isFinite, abs(offset) <= 14 * 60 * 60 else { return nil }
+        return offset
+    }
+
+    /// Writes only changed, valid offsets supplied by CareLink for an identified account.
+    func storeCareLinkDeviceOffset(_ offset: TimeInterval?, region: CareLinkRegion, account: String?, patientID: String) {
+        guard let account, !account.isEmpty, let offset,
+              offset.isFinite, abs(offset) <= 14 * 60 * 60,
+              careLinkDeviceOffset(region: region, account: account, patientID: patientID) != offset else { return }
+        var offsets = dictionary(forKey: Key.careLinkDeviceOffsets.rawValue) as? [String: [String: [String: Double]]] ?? [:]
+        offsets[region.rawValue, default: [:]][account, default: [:]][patientID] = offset
+        set(offsets, forKey: Key.careLinkDeviceOffsets.rawValue)
+    }
+
+    /// CarePartner mobile app version shared by personal and Care Partner account requests.
+    @objc dynamic var careLinkVersion: String? {
+        get {
+            if string(forKey: Key.careLinkVersion.rawValue) == nil {
+                set(ConstantsCareLink.carePartnerAppVersionDefault, forKey: Key.careLinkVersion.rawValue)
+            }
+            return string(forKey: Key.careLinkVersion.rawValue)
+        }
+        set { set(newValue, forKey: Key.careLinkVersion.rawValue) }
     }
 
     /// holds the enum integer of the type of follower keep-alive to be used
@@ -984,15 +1038,40 @@ extension UserDefaults {
         }
     }
 
-    /// holds the enum integer of the type of live activity to be shown, if any
-    /// default to 0 (disabled)
-    var liveActivityType: LiveActivityType {
+    /// should live activities be enabled? The selected style is retained when switched off.
+    @objc dynamic var liveActivitiesEnabled: Bool {
         get {
-            let liveActivityTypeAsInt = integer(forKey: Key.liveActivityType.rawValue)
-            return LiveActivityType(rawValue: liveActivityTypeAsInt) ?? .disabled
+            migrateLiveActivitySettingsIfNeeded()
+            return bool(forKey: Key.liveActivitiesEnabled.rawValue)
         }
         set {
+            migrateLiveActivitySettingsIfNeeded()
+            set(newValue, forKey: Key.liveActivitiesEnabled.rawValue)
+        }
+    }
+
+    /// holds the selected live activity style independently of whether it is enabled
+    var liveActivityType: LiveActivityType {
+        get {
+            migrateLiveActivitySettingsIfNeeded()
+            let storedType = LiveActivityType(rawValue: integer(forKey: Key.liveActivityType.rawValue)) ?? .normal
+            return storedType == .disabled ? .normal : storedType
+        }
+        set {
+            migrateLiveActivitySettingsIfNeeded()
             set(newValue.rawValue, forKey: Key.liveActivityType.rawValue)
+        }
+    }
+
+    /// split the previous combined setting only once, preserving an explicitly stored false
+    private func migrateLiveActivitySettingsIfNeeded() {
+        guard object(forKey: Key.liveActivitiesEnabled.rawValue) == nil else { return }
+        let previousType = LiveActivityType(rawValue: integer(forKey: Key.liveActivityType.rawValue)) ?? .disabled
+
+        // store enablement before replacing Disabled with the initial Normal style
+        set(previousType != .disabled, forKey: Key.liveActivitiesEnabled.rawValue)
+        if previousType == .disabled {
+            set(LiveActivityType.normal.rawValue, forKey: Key.liveActivityType.rawValue)
         }
     }
 
@@ -1004,6 +1083,12 @@ extension UserDefaults {
         set {
             set(newValue.rawValue, forKey: Key.carPlayLiveActivityType.rawValue)
         }
+    }
+
+    /// Shared visibility preference for Lock Screen, CarPlay and Smart Stack therapy metrics.
+    @objc dynamic var liveActivityShowIOBCOB: Bool {
+        get { object(forKey: Key.liveActivityShowIOBCOB.rawValue) as? Bool ?? true }
+        set { set(newValue, forKey: Key.liveActivityShowIOBCOB.rawValue) }
     }
 
     /// should adjustment be enabled?
@@ -1459,14 +1544,16 @@ extension UserDefaults {
         }
     }
 
-    /// number of preceding days used by the landscape AGP comparison
+    /// number of preceding days used by the landscape AGP comparison, or zero to hide it
     var landscapeComparisonDays: Int {
         get {
+            guard object(forKey: Key.landscapeComparisonDays.rawValue) != nil else { return 7 }
+
             let storedValue = integer(forKey: Key.landscapeComparisonDays.rawValue)
-            return [3, 7, 30, 60, 90].contains(storedValue) ? storedValue : 7
+            return [0, 3, 7, 30, 60, 90].contains(storedValue) ? storedValue : 7
         }
         set {
-            let validatedValue = [3, 7, 30, 60, 90].contains(newValue) ? newValue : 7
+            let validatedValue = [0, 3, 7, 30, 60, 90].contains(newValue) ? newValue : 7
             set(validatedValue, forKey: Key.landscapeComparisonDays.rawValue)
         }
     }
@@ -1492,6 +1579,12 @@ extension UserDefaults {
         set {
             set(newValue.rawValue, forKey: Key.screenLockDimmingType.rawValue)
         }
+    }
+
+    /// Default applies to new and upgraded installations until a preference is saved.
+    @objc dynamic var renderBasalDownwards: Bool {
+        get { object(forKey: Key.renderBasalDownwards.rawValue) == nil || bool(forKey: Key.renderBasalDownwards.rawValue) }
+        set { set(newValue, forKey: Key.renderBasalDownwards.rawValue) }
     }
 
     /// should the app show the original glucose values on the main chart when post processing is enabled?
@@ -1631,6 +1724,24 @@ extension UserDefaults {
         }
     }
 
+    /// New injections start with the last explicitly saved dose, never with an automatic submission.
+    var lastBasalInjectionUnits: Int {
+        get { integer(forKey: Key.lastBasalInjectionUnits.rawValue) }
+        set { set(newValue, forKey: Key.lastBasalInjectionUnits.rawValue) }
+    }
+
+    /// Last saved insulin name, or an empty field before the first basal injection.
+    var lastBasalInjectionInsulinDescription: String {
+        get { string(forKey: Key.lastBasalInjectionInsulinDescription.rawValue) ?? "" }
+        set { set(newValue, forKey: Key.lastBasalInjectionInsulinDescription.rawValue) }
+    }
+
+    /// Invert the stored flag so injections are visible before a filter preference has been saved.
+    @objc dynamic var showBasalInjectionTreatmentsInList: Bool {
+        get { !bool(forKey: Key.showBasalInjectionTreatmentsInList.rawValue) }
+        set { set(!newValue, forKey: Key.showBasalInjectionTreatmentsInList.rawValue) }
+    }
+
     /// should the app show the Note treatments in the treatments list/table?
     @objc dynamic var showNoteTreatmentsInList: Bool {
         // default value for bool in userdefaults is false, by default we want the app to *show* the Note treatments in the treatments table
@@ -1642,22 +1753,36 @@ extension UserDefaults {
         }
     }
 
-    /// micro-bolus threshold level in units as a Double
-    @objc dynamic var smallBolusTreatmentThreshold:Double {
+    /// Small-bolus threshold in units. A stored zero means None; only an absent value uses the default.
+    @objc dynamic var smallBolusTreatmentThreshold: Double {
         get {
-
-            var returnValue = double(forKey: Key.smallBolusTreatmentThreshold.rawValue)
-            // if 0 set to defaultvalue
-            if returnValue == 0.0 {
-                returnValue = ConstantsGlucoseChart.defaultSmallBolusTreatmentThreshold
+            guard object(forKey: Key.smallBolusTreatmentThreshold.rawValue) != nil else {
+                return ConstantsGlucoseChart.defaultSmallBolusTreatmentThreshold
             }
-
-            return returnValue
+            return double(forKey: Key.smallBolusTreatmentThreshold.rawValue)
         }
         set {
-
             set(newValue, forKey: Key.smallBolusTreatmentThreshold.rawValue)
         }
+    }
+
+    /// Small-carb chart label threshold in grams. Zero means None; an absent value defaults to 5g.
+    @objc dynamic var smallCarbTreatmentThreshold: Double {
+        get {
+            guard object(forKey: Key.smallCarbTreatmentThreshold.rawValue) != nil else {
+                return ConstantsGlucoseChart.defaultSmallCarbTreatmentThreshold
+            }
+            return double(forKey: Key.smallCarbTreatmentThreshold.rawValue)
+        }
+        set {
+            set(newValue, forKey: Key.smallCarbTreatmentThreshold.rawValue)
+        }
+    }
+
+    /// Standard is the default. Small Doses changes chart marker sizing without changing labels or treatments.
+    @objc dynamic var useSmallDoseTreatmentScale: Bool {
+        get { bool(forKey: Key.useSmallDoseTreatmentScale.rawValue) }
+        set { set(newValue, forKey: Key.useSmallDoseTreatmentScale.rawValue) }
     }
 
     /// max canula age (CAGE) as Int - if nil, return default value
@@ -1714,9 +1839,15 @@ extension UserDefaults {
         }
     }
 
-    /// should the statistics view be shown on the home screen?
+    /// GMI remains the default for both new and existing users.
+    @objc dynamic var statisticsUseHbA1c: Bool {
+        get { bool(forKey: Key.statisticsUseHbA1c.rawValue) }
+        set { set(newValue, forKey: Key.statisticsUseHbA1c.rawValue) }
+    }
+
+    /// Display GMI or estimated HbA1c in mmol/mol instead of a percentage.
     @objc dynamic var useIFCCA1C: Bool {
-        // default value for bool in userdefaults is false, by default we want the HbA1c to be calculated in "not IFCC" way (false)
+        // Default false displays GMI as a percentage. Keep this key for existing preferences.
         get {
             return bool(forKey: Key.useIFCCA1C.rawValue)
         }
@@ -1816,6 +1947,12 @@ extension UserDefaults {
         }
     }
 
+    /// Local session identity only; never exported or restored onto another app/device.
+    var dexcomSensorSessionIdentityData: Data? {
+        get { data(forKey: Key.dexcomSensorSessionIdentityData.rawValue) }
+        set { set(newValue, forKey: Key.dexcomSensorSessionIdentityData.rawValue) }
+    }
+
     /// active sensor start date. Optional as should be set to nil if there is no sensor connected or if no successful follower login has happened and/or if no active sensor is returned
     @objc dynamic var activeSensorStartDate: Date? {
         get {
@@ -1845,18 +1982,6 @@ extension UserDefaults {
             set(newValue, forKey: Key.activeSensorMaxSensorAgeInDaysOverridenAnubis.rawValue)
         }
     }
-
-    /// should we force a 15 day sensor max days for G7 sensors?
-    var is15DayDexcomG7: Bool {
-        // default value for bool in userdefaults is false, by default we want to assume a standard (usually 10-day) sensor life (false)
-        get {
-            return bool(forKey: Key.is15DayDexcomG7.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.is15DayDexcomG7.rawValue)
-        }
-    }
-
 
     // MARK: Housekeeper Settings
 
@@ -2298,6 +2423,39 @@ extension UserDefaults {
         }
     }
 
+    /// An optional daily limit on speech. Enabling it does not turn on the master switch.
+    var speakReadingsScheduleEnabled: Bool {
+        get { bool(forKey: Key.speakReadingsScheduleEnabled.rawValue) }
+        set { set(newValue, forKey: Key.speakReadingsScheduleEnabled.rawValue) }
+    }
+
+    /// Wall-clock minutes, not absolute dates: the daily window follows the phone's local time zone.
+    var speakReadingsStartMinute: Int {
+        get { object(forKey: Key.speakReadingsStartMinute.rawValue) as? Int ?? 9 * 60 }
+        set { set(newValue, forKey: Key.speakReadingsStartMinute.rawValue) }
+    }
+
+    /// End of the daily window, excluded from the speaking period. Defaults to 22:00.
+    var speakReadingsEndMinute: Int {
+        get { object(forKey: Key.speakReadingsEndMinute.rawValue) as? Int ?? 22 * 60 }
+        set { set(newValue, forKey: Key.speakReadingsEndMinute.rawValue) }
+    }
+
+    /// The schedule only restricts speech; it never changes the master switch used by Siri,
+    /// Home Screen actions, and Settings. Evaluate at each reading rather than relying on a
+    /// background timer. Calendar components follow local time, including daylight-saving changes.
+    func shouldSpeakReadings(at date: Date = Date(), calendar: Calendar = .current) -> Bool {
+        guard speakReadings else { return false }
+        guard speakReadingsScheduleEnabled else { return true }
+        let start = speakReadingsStartMinute
+        let end = speakReadingsEndMinute
+        // The UI rejects equal times. Treat invalid imported values as a closed window too.
+        guard (0..<1440).contains(start), (0..<1440).contains(end), start != end else { return false }
+        let minute = calendar.component(.hour, from: date) * 60 + calendar.component(.minute, from: date)
+        // Include the enable minute and exclude the disable minute, also across midnight.
+        return start < end ? (minute >= start && minute < end) : (minute >= start || minute < end)
+    }
+
     /// speakReading languageCode, eg "en" or "en-US"
     @objc dynamic var speakReadingLanguageCode: String? {
         get {
@@ -2306,6 +2464,12 @@ extension UserDefaults {
         set {
             set(newValue, forKey: Key.speakReadingLanguageCode.rawValue)
         }
+    }
+
+    /// Include the opening phrase unless the user explicitly disables it.
+    @objc dynamic var speakIntroduction: Bool {
+        get { object(forKey: Key.speakIntroduction.rawValue) as? Bool ?? true }
+        set { set(newValue, forKey: Key.speakIntroduction.rawValue) }
     }
 
     /// should trend be spoken or not
@@ -2395,66 +2559,6 @@ extension UserDefaults {
         set {
             let newValueAsInt:Int? = {if let newValue = newValue {return Int(newValue.rawValue)} else {return nil}}()
             set(newValueAsInt, forKey: Key.m5StackTextColor.rawValue)
-        }
-    }
-
-    /// name of wifi 1 to be configured in M5Stack
-    var m5StackWiFiName1: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiName1.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiName1.rawValue)
-        }
-    }
-
-    /// name of wifi 2 to be configured in M5Stack
-    var m5StackWiFiName2: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiName2.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiName2.rawValue)
-        }
-    }
-
-    /// name of wifi 3 to be configured in M5Stack
-    var m5StackWiFiName3: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiName3.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiName3.rawValue)
-        }
-    }
-
-    /// Password of wifi 1 to be configured in M5Stack
-    var m5StackWiFiPassword1: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiPassword1.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiPassword1.rawValue)
-        }
-    }
-
-    /// Password of wifi 2 to be configured in M5Stack
-    var m5StackWiFiPassword2: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiPassword2.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiPassword2.rawValue)
-        }
-    }
-
-    /// Password of wifi 3 to be configured in M5Stack
-    var m5StackWiFiPassword3: String? {
-        get {
-            return string(forKey: Key.m5StackWiFiPassword3.rawValue)
-        }
-        set {
-            set(newValue, forKey: Key.m5StackWiFiPassword3.rawValue)
         }
     }
 
@@ -3021,6 +3125,41 @@ extension UserDefaults {
         set {
             set(newValue, forKey: Key.storeFrequentReadingsInHealthKit.rawValue)
         }
+    }
+
+    /// G7 defaults to the established coexistence path for existing and new installations.
+    @objc dynamic var dexcomG7UseOtherApp: Bool {
+        get {
+            return object(forKey: Key.dexcomG7UseOtherApp.rawValue) as? Bool ?? true
+        }
+        set {
+            set(newValue, forKey: Key.dexcomG7UseOtherApp.rawValue)
+        }
+    }
+
+    /// Returns the applicator code only for the sensor that supplied it.
+    func dexcomG7PairingCode(for transmitterID: String?) -> String? {
+        guard let transmitterID, !transmitterID.isEmpty,
+              let value = string(forKey: "\(Key.dexcomG7PairingCode.rawValue)-\(transmitterID)"),
+              value.count == 4,
+              value.allSatisfy(\.isNumber) else { return nil }
+        return value
+    }
+
+    func setDexcomG7PairingCode(_ pairingCode: String, for transmitterID: String?) {
+        guard let transmitterID, !transmitterID.isEmpty else { return }
+        set(pairingCode, forKey: "\(Key.dexcomG7PairingCode.rawValue)-\(transmitterID)")
+    }
+
+    func dexcomG7BluetoothSlot(for transmitterID: String?) -> DexcomG7BluetoothSlot {
+        guard let transmitterID, !transmitterID.isEmpty else { return .defaultSlot }
+        let rawValue = integer(forKey: "\(Key.dexcomG7BluetoothSlot.rawValue)-\(transmitterID)")
+        return DexcomG7BluetoothSlot(rawValue: UInt8(clamping: rawValue)) ?? .defaultSlot
+    }
+
+    func setDexcomG7BluetoothSlot(_ slot: DexcomG7BluetoothSlot, for transmitterID: String?) {
+        guard let transmitterID, !transmitterID.isEmpty else { return }
+        set(Int(slot.rawValue), forKey: "\(Key.dexcomG7BluetoothSlot.rawValue)-\(transmitterID)")
     }
 
 

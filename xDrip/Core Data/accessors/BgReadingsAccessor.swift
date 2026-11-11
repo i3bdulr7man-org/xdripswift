@@ -217,7 +217,7 @@ class BgReadingsAccessor: ObservableObject {
                         calibrationSnapshot = nil
                     }
 
-                    returnValue.append(BgReadingSnapshot(timeStamp: bgReading.timeStamp, calculatedValue: bgReading.calculatedValue, rawData: bgReading.rawData, finalValue: bgReading.finalValue, adjustedValue: bgReading.adjustedValue?.doubleValue, smoothedValue: bgReading.smoothedValue?.doubleValue, backfilledAt: bgReading.backfilledAt, calculatedValueSlope: bgReading.calculatedValueSlope, hideSlope: bgReading.hideSlope, id: bgReading.id, deviceName: bgReading.deviceName, calibrationSnapshot: calibrationSnapshot, sensorID: bgReading.sensor?.id, objectID: bgReading.objectID))
+                    returnValue.append(BgReadingSnapshot(timeStamp: bgReading.timeStamp, calculatedValue: bgReading.calculatedValue, rawData: bgReading.rawData, finalValue: bgReading.finalValue, adjustedValue: bgReading.adjustedValue?.doubleValue, smoothedValue: bgReading.smoothedValue?.doubleValue, backfilledAt: bgReading.backfilledAt, valueIsFromWatch: bgReading.valueIsFromWatch, watchReceivedAt: bgReading.watchReceivedAt, wasAlsoCollectedByWatch: bgReading.wasAlsoCollectedByWatch, calculatedValueSlope: bgReading.calculatedValueSlope, hideSlope: bgReading.hideSlope, id: bgReading.id, deviceName: bgReading.deviceName, calibrationSnapshot: calibrationSnapshot, sensorID: bgReading.sensor?.id, objectID: bgReading.objectID))
 
                     if let limit = limit, returnValue.count == limit { break }
                 }
@@ -235,7 +235,7 @@ class BgReadingsAccessor: ObservableObject {
     /// Only readings with meaningful values are included (calculatedValue != 0.0 OR rawData != 0.0).
     /// - Parameters:
     ///   - forSensor: If not nil, restrict results to this sensor.
-    ///   - endingAt: The window end time; the window start is "endingAt - 24h".
+    ///   - endingAt: The window end time. The window start is "endingAt - 24h".
     /// - Returns: An array of timestamps sorted ascending. May be empty.
     func getReadingTimestampsForLast24h(forSensor sensor: Sensor?, endingAt endDate: Date) -> [Date] {
         let twentyFourHoursBefore = endDate.addingTimeInterval(-24 * 3600)

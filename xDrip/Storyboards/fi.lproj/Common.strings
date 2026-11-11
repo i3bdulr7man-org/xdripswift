@@ -1,5 +1,6 @@
 "common_Ok" = "OK";
 "common_cancel" = "Peruuta";
+"common_close" = "Sulje";
 "common_mgdl" = "mg/dL";
 "common_mmol" = "mmol/L";
 "common_bloodglucoseunit" = "Verensokeri yksikkö";
@@ -24,7 +25,6 @@
 "white" = "valkoinen";
 "yellow" = "keltainen";
 "name" = "Nimi";
-"WiFi" = "WiFi";
 "on" = "Päällä";
 "off" = "Pois";
 "delete" = "Poista";
@@ -48,9 +48,13 @@
 "common_statistics_high" = "Korkea";
 
 /// phrase HbA1c
-"common_statistics_a1c" = "HbA1c";
 
 /// coefficient of variation
+"common_statistics_gmiTrend" = "GMI-trendi";
+"common_statistics_threeDay" = "3 päivän välein";
+"common_statistics_weekly" = "Viikoittain";
+"common_statistics_daily" = "Päivittäin";
+"common_statistics_gmi" = "GMI";
 "common_statistics_cv" = "CV";
 
 /// the word low
@@ -58,8 +62,9 @@
 
 /// literal translation needed
 "common_days" = "päivää";
-"common_landscape_comparingWithLast" = "Vertailu viimeisiin:";
+"common_landscape_showAGPChartData" = "Näytä AGP-kaavion tiedot:";
 "common_landscape_comparisonDays" = "%d päivää";
+"common_landscape_comparisonNone" = "Ei mitään";
 
 /// the word average
 "common_statistics_average" = "Keskiarvo";
@@ -88,3 +93,29 @@
 
 /// the words in user range
 "common_statistics_userRange" = "User Range";
+
+// Local therapy accessibility
+"therapy.estimatedIOB" = "Arvioitu aktiivinen insuliini";
+"therapy.estimatedCOB" = "Arvioidut aktiiviset hiilihydraatit";
+
+/* Actions for leaving an editor with unsaved changes. */
+"common_unsavedChanges" = "Tallentamattomat muutokset";
+"common_save" = "Tallenna";
+"common_discardChanges" = "Hylkää muutokset";
+"common_back" = "Takaisin";
+
+// Live Activity sensor warm-up
+"common_sensorWarmingUp" = "Sensori lämpenee";
+"common_sensorWarmupUntilFormat" = "Päättyy klo %@";
+"common_sensorWarmupComplete" = "Lämpeneminen valmis";
+"common_sensorWaitingForReading" = "Odotetaan ensimmäistä lukemaa…";
+
+"common_statistics_a1c" = "HbA1c";
+
+"common_statistics_estimatedA1c" = "Arvioitu HbA1c";
+
+/* Switch title when the surrounding screen or section identifies the feature */
+"common_enable" = "Ota käyttöön";
+
+/* Status label, including Direct to Watch in Advanced Settings. */
+"common_enabled" = "Käytössä";

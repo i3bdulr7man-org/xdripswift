@@ -1,5 +1,6 @@
 "common_Ok" = "تم";
 "common_cancel" = "إلغاء";
+"common_close" = "إغلاق";
 "common_mgdl" = "mg/dL";
 "common_mmol" = "mmol/L";
 "common_bloodglucoseunit" = "وحدة قياس سكر الدم";
@@ -14,8 +15,9 @@
 "common_minute" = "دقيقة";
 "common_day" = "يوم";
 "common_days" = "أيام";
-"common_landscape_comparingWithLast" = "المقارنة مع آخر:";
+"common_landscape_showAGPChartData" = "عرض بيانات مخطط AGP:";
 "common_landscape_comparisonDays" = "%d أيام";
+"common_landscape_comparisonNone" = "لا شيء";
 "common_today" = "اليوم";
 "common_week" = "أسبوع";
 "common_todayshort" = "اليوم";
@@ -31,7 +33,6 @@
 "white" = "أبيض";
 "yellow" = "أصفر";
 "name" = "الاسم";
-"WiFi" = "WiFi";
 "on" = "تفعيل";
 "off" = "إغلاق";
 "delete" = "حذف";
@@ -45,7 +46,11 @@
 "common_statistics_inRange" = "في الهدف";
 "common_statistics_high" = "مرتفع";
 "common_statistics_average" = "المتوسط";
-"common_statistics_a1c" = "HbA1c";
+"common_statistics_gmiTrend" = "اتجاه GMI";
+"common_statistics_threeDay" = "كل 3 أيام";
+"common_statistics_weekly" = "أسبوعيًا";
+"common_statistics_daily" = "يوميًا";
+"common_statistics_gmi" = "GMI";
 "common_statistics_cv" = "CV";
 "common_dontshowagain" = "لا تعرض مرة أخرى";
 
@@ -58,3 +63,29 @@
 
 /// the words in user range
 "common_statistics_userRange" = "User Range";
+
+// Local therapy accessibility
+"therapy.estimatedIOB" = "الإنسولين النشط المقدّر";
+"therapy.estimatedCOB" = "الكربوهيدرات النشطة المقدّرة";
+
+/* Actions for leaving an editor with unsaved changes. */
+"common_unsavedChanges" = "تغييرات غير محفوظة";
+"common_save" = "حفظ";
+"common_discardChanges" = "تجاهل التغييرات";
+"common_back" = "رجوع";
+
+// Live Activity sensor warm-up
+"common_sensorWarmingUp" = "جارٍ إحماء المستشعر";
+"common_sensorWarmupUntilFormat" = "حتى %@";
+"common_sensorWarmupComplete" = "اكتمل الإحماء";
+"common_sensorWaitingForReading" = "بانتظار القراءة الأولى…";
+
+"common_statistics_a1c" = "HbA1c";
+
+"common_statistics_estimatedA1c" = "HbA1c المقدّر";
+
+/* Switch title when the surrounding screen or section identifies the feature */
+"common_enable" = "تفعيل";
+
+/* Status label, including Direct to Watch in Advanced Settings. */
+"common_enabled" = "مفعّل";

@@ -12,7 +12,7 @@ fileprivate enum Setting:Int, CaseIterable {
     /// - except if there's been a disconnect, in that case this value is not taken into account
     case notificationInterval = 1
     
-    /// show live activities type, if any
+    /// choose the remembered live activity style
     case liveActivityType = 2
     
     /// show reading in app badge
@@ -37,6 +37,7 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
     private let log = OSLog(subsystem: ConstantsLog.subSystem, category: ConstantsLog.categorySettingsViewDataSourceSettingsViewModel)
 
     private let rowGroup: NotificationSettingsRowGroup
+    private var therapyMetricsObserver: NSObjectProtocol?
     
     // MARK: - Native SwiftUI rows
 
@@ -106,9 +107,10 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
                 id: "notifications.liveActivityType",
                 index: Setting.liveActivityType.rawValue,
                 sectionID: sectionID,
-                isVisible: liveActivitiesAvailable
+                isVisible: liveActivitiesAvailable && UserDefaults.standard.liveActivitiesEnabled
             )
             if UserDefaults.standard.isMaster || UserDefaults.standard.followerBackgroundKeepAliveType == .heartbeat {
+                // keep Disabled for older settings and activity payloads, but hide it here because the switch controls enablement
                 let liveActivityTypes = LiveActivityType.allCasesForList
                 liveActivityTypeRow.accessory = .none
                 liveActivityTypeRow.control = .menu(
@@ -135,14 +137,46 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
                     }
                 )
             }
+            // keep the enable switch visible whilst all dependent controls are hidden
             return [
+                SettingsRow(
+                    id: "notifications.liveActivitiesEnabled",
+                    title: Texts_Common.enable,
+                    control: .toggle(
+                        isOn: { UserDefaults.standard.liveActivitiesEnabled },
+                        setIsOn: { isOn in
+                            // changing enablement must not replace the user's selected style
+                            UserDefaults.standard.liveActivitiesEnabled = isOn
+                            let mode = isOn ? UserDefaults.standard.liveActivityType : .disabled
+                            trace(
+                                "Live activities enabled was changed to '%{public}@'",
+                                log: self.log,
+                                category: ConstantsLog.categorySettingsViewNotificationsSettingsViewModel,
+                                type: .info,
+                                troubleshooting: .standard(.configuration(.liveActivityChanged(TroubleshootingLiveActivityMode(mode)))),
+                                isOn.description
+                            )
+                        }
+                    ),
+                    isVisible: liveActivitiesAvailable
+                ),
                 liveActivityTypeRow,
+                SettingsRow(
+                    id: "notifications.liveActivityShowIOBCOB",
+                    title: TherapyTexts.text("showIOBCOB"),
+                    control: .toggle(
+                        isOn: { UserDefaults.standard.liveActivityShowIOBCOB },
+                        setIsOn: { UserDefaults.standard.liveActivityShowIOBCOB = $0 }
+                    ),
+                    isEnabled: therapyTrackingAvailable,
+                    isVisible: liveActivitiesAvailable && UserDefaults.standard.liveActivitiesEnabled
+                ),
                 SettingsRow(
                     id: "notifications.liveActivityPreview",
                     title: Texts_SettingsView.liveActivityStyle,
                     accessory: .none,
                     control: .custom(content: { AnyView(LiveActivitySettingsPreview()) }),
-                    isVisible: liveActivitiesAvailable && UserDefaults.standard.liveActivityType != .disabled
+                    isVisible: liveActivitiesAvailable && UserDefaults.standard.liveActivitiesEnabled
                 )
             ]
         case .carPlay:
@@ -252,14 +286,15 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
                     
                 }
                 
-                return SettingsSelectedRowAction.selectFromList(title: Texts_SettingsView.labelLiveActivityType, data: data, selectedRow: selectedRow, actionTitle: nil, cancelTitle: nil, actionHandler: {(index:Int) in
+                return SettingsSelectedRowAction.selectFromList(title: Texts_SettingsView.liveActivityStyle, data: data, selectedRow: selectedRow, actionTitle: nil, cancelTitle: nil, actionHandler: {(index:Int) in
                     
                     // we'll set this here so that we can use it in the else statement for logging
                     let oldLiveActivityType = UserDefaults.standard.liveActivityType
                     
-                    if index != selectedRow {
+                    // use the same style order as the native picker now that Disabled is excluded
+                    if LiveActivityType.allCasesForList.indices.contains(index), index != selectedRow {
                         
-                        UserDefaults.standard.liveActivityType = LiveActivityType(forRowAt: index) ?? .disabled
+                        UserDefaults.standard.liveActivityType = LiveActivityType.allCasesForList[index]
                         
                         let newLiveActivityType = UserDefaults.standard.liveActivityType
                         
@@ -279,7 +314,7 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
                 
             } else {
                 
-                return .showInfoText(title: Texts_SettingsView.labelLiveActivityType, message: Texts_SettingsView.liveActivityDisabledInFollowerModeMessage, actionHandler: {})
+                return .showInfoText(title: Texts_SettingsView.liveActivityStyle, message: Texts_SettingsView.liveActivityDisabledInFollowerModeMessage, actionHandler: {})
                 
             }
         }
@@ -394,7 +429,16 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
     
 
     func settingsSectionFooter() -> String? {
-        rowGroup == .liveActivities && !liveActivitiesAvailable ? Texts_SettingsView.liveActivityDisabledInFollowerModeMessage : nil
+        guard rowGroup == .liveActivities else { return nil }
+        guard liveActivitiesAvailable else { return Texts_SettingsView.liveActivityDisabledInFollowerModeMessage }
+        guard UserDefaults.standard.liveActivitiesEnabled else { return nil }
+        return TherapyTexts.text(therapyTrackingAvailable ? "liveActivityMetricsFooter" : "liveActivityMetricsUnavailable")
+    }
+
+    private var therapyTrackingAvailable: Bool {
+        let policy = UserDefaults.standard.dataFlowPolicy
+        return policy.externalIOBSource != nil || policy.externalCOBSource != nil
+            || TherapyMetricsManager.shared.snapshot().hasVisibleMetrics
     }
 
     private var notificationIntervalDetailText: String {
@@ -406,7 +450,7 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
     }
 
     private var carPlaySettingsVisible: Bool {
-        guard liveActivitiesAvailable, UserDefaults.standard.liveActivityType != .disabled else { return false }
+        guard liveActivitiesAvailable, UserDefaults.standard.liveActivitiesEnabled else { return false }
         if #available(iOS 26.0, *) {
             return true
         }
@@ -438,9 +482,16 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
     // MARK: - observe functions
     
     private func addObservers() {
+        therapyMetricsObserver = NotificationCenter.default.addObserver(forName: TherapyMetricsManager.changed, object: nil, queue: .main) { [weak self] _ in
+            self?.sectionReloadClosure?()
+        }
+        // redraw the live activity preview when its displayed metrics change
+        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.liveActivityShowIOBCOB.rawValue, options: .new, context: nil)
         
         // Listen for changes in the active sensor value to trigger the UI to be updated
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.followerBackgroundKeepAliveType.rawValue, options: .new, context: nil)
+        // refresh the dependent rows and sections when enablement changes
+        UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.liveActivitiesEnabled.rawValue, options: .new, context: nil)
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.liveActivityType.rawValue, options: .new, context: nil)
         UserDefaults.standard.addObserver(self, forKeyPath: UserDefaults.Key.carPlayLiveActivityType.rawValue, options: .new, context: nil)
         
@@ -454,8 +505,10 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
         
         switch keyPathEnum {
         case UserDefaults.Key.followerBackgroundKeepAliveType,
+             UserDefaults.Key.liveActivitiesEnabled,
              UserDefaults.Key.liveActivityType,
-             UserDefaults.Key.carPlayLiveActivityType:
+             UserDefaults.Key.carPlayLiveActivityType,
+             UserDefaults.Key.liveActivityShowIOBCOB:
             
             // we have to run this in the main thread to avoid access errors
             DispatchQueue.main.async {
@@ -465,6 +518,13 @@ class SettingsViewNotificationsSettingsViewModel: NSObject, SettingsViewModelPro
         default:
             break
             
+        }
+    }
+
+    deinit {
+        if let therapyMetricsObserver { NotificationCenter.default.removeObserver(therapyMetricsObserver) }
+        for key in [UserDefaults.Key.followerBackgroundKeepAliveType, .liveActivitiesEnabled, .liveActivityType, .carPlayLiveActivityType, .liveActivityShowIOBCOB] {
+            UserDefaults.standard.removeObserver(self, forKeyPath: key.rawValue)
         }
     }
 }

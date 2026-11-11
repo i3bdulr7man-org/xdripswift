@@ -1,5 +1,6 @@
 "common_Ok" = "OK";
 "common_cancel" = "Ακύρωση";
+"common_close" = "Κλείσιμο";
 "common_mgdl" = "mg/dL";
 "common_mmol" = "mmol/L";
 "common_bloodglucoseunit" = "Μονάδα μέτρησης γλυκόζης αίματος";
@@ -14,8 +15,9 @@
 "common_minute" = "λεπτό";
 "common_day" = "ημέρα";
 "common_days" = "ημέρες";
-"common_landscape_comparingWithLast" = "Σύγκριση με τις τελευταίες:";
+"common_landscape_showAGPChartData" = "Εμφάνιση δεδομένων γραφήματος AGP:";
 "common_landscape_comparisonDays" = "%d ημέρες";
+"common_landscape_comparisonNone" = "Καμία";
 "common_today" = "Σήμερα";
 "common_week" = "βδομάδα";
 "common_hourshort" = "ω";
@@ -31,7 +33,6 @@
 "white" = "άσπρο";
 "yellow" = "κίτρινο";
 "name" = "Όνομα";
-"WiFi" = "WiFi";
 "on" = "Ναι";
 "off" = "Όχι";
 "delete" = "Διαγραφή";
@@ -45,7 +46,11 @@
 "common_statistics_inRange" = "Εντός στόχου";
 "common_statistics_high" = "Υψηλή";
 "common_statistics_average" = "Μέσος όρος";
-"common_statistics_a1c" = "HbA1c";
+"common_statistics_gmiTrend" = "Τάση GMI";
+"common_statistics_threeDay" = "Ανά 3 ημέρες";
+"common_statistics_weekly" = "Εβδομαδιαία";
+"common_statistics_daily" = "Ημερήσια";
+"common_statistics_gmi" = "GMI";
 "common_statistics_cv" = "CV";
 "common_dontshowagain" = "Να μην εμφανιστεί ξανά";
 
@@ -58,3 +63,29 @@
 
 /// the words in user range
 "common_statistics_userRange" = "User Range";
+
+// Local therapy accessibility
+"therapy.estimatedIOB" = "Εκτιμώμενη ενεργή ινσουλίνη";
+"therapy.estimatedCOB" = "Εκτιμώμενοι ενεργοί υδατάνθρακες";
+
+/* Actions for leaving an editor with unsaved changes. */
+"common_unsavedChanges" = "Μη αποθηκευμένες αλλαγές";
+"common_save" = "Αποθήκευση";
+"common_discardChanges" = "Απόρριψη αλλαγών";
+"common_back" = "Πίσω";
+
+// Live Activity sensor warm-up
+"common_sensorWarmingUp" = "Ο αισθητήρας προθερμαίνεται";
+"common_sensorWarmupUntilFormat" = "Έως %@";
+"common_sensorWarmupComplete" = "Η προθέρμανση ολοκληρώθηκε";
+"common_sensorWaitingForReading" = "Αναμονή πρώτης μέτρησης…";
+
+"common_statistics_a1c" = "HbA1c";
+
+"common_statistics_estimatedA1c" = "Εκτιμώμενη HbA1c";
+
+/* Switch title when the surrounding screen or section identifies the feature */
+"common_enable" = "Ενεργοποίηση";
+
+/* Status label, including Direct to Watch in Advanced Settings. */
+"common_enabled" = "Ενεργό";

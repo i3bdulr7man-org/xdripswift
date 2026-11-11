@@ -8,27 +8,55 @@
 
 import Foundation
 
-/**
-  at creation, check if glucoseIsDisplayOnly is false
- */
+/// Decodes the 19-byte `0x4E` response requested directly by primary mode.
+///
+/// This packet normally contains the current reading, but its second byte is an independent
+/// response status. A failed sensor can return a non-zero status together with a structurally valid
+/// copy of its last reading. The parser therefore preserves both pieces of information and leaves
+/// the publication decision to `CGMG7Transmitter`.
 public struct G7GlucoseMessage {
-    
+    /// `0x00` identifies a current glucose response. Dexcom can also return a complete 19-byte
+    /// frame with a non-zero status and the last cached glucose. Keep the status separate so the
+    /// caller can report the sensor state without publishing that stale value as a new reading.
+    let responseStatus: UInt8
+
+    /// Wall-clock date reconstructed by subtracting the packet age from receipt time.
     let timeStamp: Date
-    
+
+    /// Wall-clock reference for the packet's transmitter clock, used by calibration.
+    let receivedAt: Date
+
+    /// Delay between the reading and packet receipt, in seconds.
+    let messageAge: TimeInterval
+
+    /// Glucose value after removing Dexcom's flag bits, expressed in mg/dL.
     let calculatedValue: Double
-    
+
+    /// Sensor algorithm state used by status, Activity Log, alert, and banner consumers.
     let algorithmStatus: DexcomAlgorithmState
-    
+
+    /// Seconds between sensor start and the reported reading.
     let sensorAge: TimeInterval
 
+    /// Optional raw glucose after its upper flag bits have been removed.
     private let glucose: UInt16?
+
+    /// Optional transmitter prediction. It is decoded for packet completeness but not published.
     private let predicted: UInt16?
-    private let messageTimestamp: UInt32 // timestamp of the message, in seconds since sensor start
+
+    /// Sensor clock at packet receipt, before subtracting the age of the reading.
+    let transmitterTime: UInt32
+
+    /// Packet sequence number retained for protocol completeness.
     private let sequence: UInt16
+
+    /// Signed Dexcom trend value in mg/dL per minute, or nil when the sentinel is present.
     private let trend: Double?
+
+    /// Dexcom display-only flag decoded from the final calibration and flags byte.
     private let glucoseIsDisplayOnly: Bool
 
-    init?(data: Data) {
+    init?(data: Data, receivedAt: Date = Date()) {
         //    0  1  2 3 4 5  6 7  8  9 10 11 1213 14 15 1617 18
         //         TTTTTTTT SQSQ       AG    BGBG SS TR PRPR C
         // 0x4e 00 d5070000 0900 00 01 05 00 6100 06 01 ffff 0e
@@ -41,32 +69,42 @@ public struct G7GlucoseMessage {
         //     PRPR = predicted
         //        C = calibration
 
-        guard data.count >= 19 else {
+        guard data.count >= 19, data.starts(with: .glucoseG6Tx) else {
             return nil
         }
 
-        guard data[1] == 00 else {
-            return nil
-        }
+        // Parse the response status before the glucose fields. A non-zero value does not make the
+        // frame malformed, so rejecting it here would hide the algorithm failure state from the UI
+        // and diagnostics.
+        responseStatus = data[1]
 
-        // not used?
-        sequence = data[6..<8].to(UInt16.self)
+        // The sequence is not needed by the current delivery pipeline, but parsing its exact field
+        // documents the packet layout and keeps later diagnostics from guessing at byte offsets.
+        sequence = data[6 ..< 8].to(UInt16.self)
 
-        // time between sensor start and reading, in seconds
-        messageTimestamp = data[2..<6].toInt()
+        // This clock advances even when the packet repeats an older glucose reading.
+        transmitterTime = data[2 ..< 6].toInt()
 
-        // time between reading and the actual receipt of the ble message (something like 7 seconds)
-        let messageAge = data[10]
+        // Time between the reading and receipt of the BLE message. This is a two-byte field. The
+        // high byte becomes important for the old cached record returned after a sensor failure.
+        messageAge = TimeInterval(data[10 ..< 12].to(UInt16.self))
+        self.receivedAt = receivedAt
 
-        // we assume reading is now, so sensorage = messageTimestamp + messageAge
-        sensorAge = TimeInterval(messageTimestamp) + TimeInterval(messageAge)
+        // The delegate pairs sensor age with the reading timestamp, not receipt time.
+        // Adding age here subtracts the delay twice when reconstructing sensor start,
+        // making an unchanged session appear to move backwards after missed readings.
+        guard messageAge <= TimeInterval(transmitterTime) else { return nil }
+        sensorAge = TimeInterval(transmitterTime) - messageAge
 
-        // timestamp of the glucose reading is now - age of the message
-        timeStamp = Date().addingTimeInterval(-TimeInterval(messageAge))
+        // Convert the packet delay into the wall-clock time used by Core Data and chart delivery.
+        timeStamp = receivedAt.addingTimeInterval(-messageAge)
 
-        let glucoseData = data[12..<14].to(UInt16.self)
-        if glucoseData != 0xffff {
-            glucose = glucoseData & 0xfff
+        // The upper bits carry flags. Mask them away only after recognising 0xFFFF as Dexcom's
+        // unavailable sentinel. A cached value in a non-zero-status frame is still decoded for
+        // diagnostics, although the transmitter layer will not publish it.
+        let glucoseData = data[12 ..< 14].to(UInt16.self)
+        if glucoseData != 0xFFFF {
+            glucose = glucoseData & 0xFFF
             glucoseIsDisplayOnly = (data[18] & 0x10) > 0
             calculatedValue = Double(glucose!)
         } else {
@@ -75,29 +113,55 @@ public struct G7GlucoseMessage {
             calculatedValue = 0.0
         }
 
-        let predictionData = data[16..<18].to(UInt16.self)
-        if predictionData != 0xffff {
-            predicted = predictionData & 0xfff
+        // Prediction uses the same flag-bit layout and `0xFFFF` unavailable sentinel as glucose.
+        let predictionData = data[16 ..< 18].to(UInt16.self)
+        if predictionData != 0xFFFF {
+            predicted = predictionData & 0xFFF
         } else {
             predicted = nil
         }
 
+        // Preserve an unknown algorithm byte as the established neutral state rather than failing
+        // the whole glucose packet and losing an otherwise valid reading.
         if let receivedState = DexcomAlgorithmState(rawValue: data[14]) {
-            
             algorithmStatus = receivedState
-            
+
         } else {
-            
             algorithmStatus = DexcomAlgorithmState.None
-            
         }
-        
-        if data[15] == 0x7f {
+
+        // Trend is a signed value in tenths. `0x7F` means that no trend is currently available.
+        if data[15] == 0x7F {
             trend = nil
         } else {
             trend = Double(Int8(bitPattern: data[15])) / 10
         }
-
     }
+}
 
+/// The official Dexcom app uses the older `0x31` glucose response while it owns the G7
+/// connection. Its transmitter timestamp is combined with the following `0x25` response so
+/// coexistence can recover the reading date and sensor age without sending another command.
+///
+/// This intentionally contains no pairing or authentication logic. It is merely the passive data
+/// half observed after the other app has already established an authenticated session.
+struct G7CoexistenceGlucoseMessage {
+    /// Glucose value after removing the upper Dexcom flag bits.
+    let calculatedValue: Double
+
+    /// Sensor algorithm state observed from the other app's authenticated data stream.
+    let algorithmStatus: DexcomAlgorithmState
+
+    /// Relative reading timestamp that must be joined with a `0x25` clock response.
+    let transmitterTime: UInt32
+
+    init?(data: Data) {
+        guard data.count >= 16, data.starts(with: .glucoseRx) else { return nil }
+
+        // Unlike 0x4E, this packet does not carry the sensor-start reference needed to calculate
+        // age. Preserve its relative transmitter time and let the caller join it with 0x25.
+        calculatedValue = Double(data[10 ..< 12].to(UInt16.self) & 0x0FFF)
+        algorithmStatus = DexcomAlgorithmState(rawValue: data[12]) ?? .None
+        transmitterTime = data[6 ..< 10].to(UInt32.self)
+    }
 }

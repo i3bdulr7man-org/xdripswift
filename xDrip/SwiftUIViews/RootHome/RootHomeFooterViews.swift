@@ -253,11 +253,26 @@ struct RootHomeDataSourceView: View {
                         .foregroundStyle(state.keepAliveColor)
                 }
 
+                if let mode = state.dexcomConnectionMode {
+                    Image(systemName: mode.systemImage)
+                        .foregroundStyle(mode.color)
+                        .font(.system(size: 14))
+                        .accessibilityLabel(dexcomModeAccessibilityLabel(mode))
+                }
+
                 Text(state.title)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(ConstantsAppColors.dataSourceText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+
+                if state.showsWatchCollectorIcon {
+                    Image(systemName: ConstantsDirectWatch.watchSymbol(for: state.watchCollectorHealth))
+                        .font(.system(size: 14))
+                        .foregroundStyle(ConstantsDirectWatch.statusColor(for: state.watchCollectorHealth))
+                        .fixedSize()
+                        .accessibilityLabel(state.watchCollectorHealth.title)
+                }
             }
             .layoutPriority(1)
 
@@ -305,5 +320,11 @@ struct RootHomeDataSourceView: View {
 
     private var dataSourceDetailColor: Color {
         sensorState.currentAge.isEmpty ? state.detailColor : sensorState.currentAgeColor
+    }
+
+    private func dexcomModeAccessibilityLabel(_ mode: DexcomConnectionMode) -> String {
+        mode == .coexistence
+            ? Texts_BluetoothPeripheralView.runningInCoexistenceMode
+            : Texts_BluetoothPeripheralView.runningInPrimaryMode
     }
 }

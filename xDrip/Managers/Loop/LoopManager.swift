@@ -98,6 +98,7 @@ enum XDripCGMMetadataBuilder {
         let expectedInterval = defaults.isMaster ? directExpectedInterval(transmitterType) : followerExpectedInterval(defaults.followerDataSourceType)
         let startDate = context.activeSensor?.startDate ?? defaults.activeSensorStartDate
         let model = defaults.activeSensorDescription ?? transmitterType?.detailedDescription()
+        let isAnubis = defaults.isMaster && context.transmitter?.isAnubisG6() == true
         let maxAgeInDays = context.transmitter?.maxSensorAgeInDays() ?? defaults.activeSensorMaxSensorAgeInDays
         let warmupEnd = startDate.map { $0.addingTimeInterval(warmupDuration(transmitter: context.transmitter, defaults: defaults)) }
 
@@ -149,7 +150,7 @@ enum XDripCGMMetadataBuilder {
                 case .persistentNoise: return "persistent_noise"
                 case .flatline: return "flatline"
                 case .dexcomExcessNoise: return "excess_noise"
-                case .dexcomTemporarySensorIssue, .dexcomQuestionMarks: return "temporary_sensor_issue"
+                case .dexcomTemporarySensorIssue, .dexcomQuestionMarks, .libreTemporarySensorIssue: return "temporary_sensor_issue"
                 case .dexcomSensorFailure, .libreSensorFailure, .dexcomTransmitterFailure, .dexcomTransmitterBatteryFailure:
                     return "sensor_error"
                 }
@@ -195,7 +196,7 @@ enum XDripCGMMetadataBuilder {
             switch batteryInfo {
             case let .percentage(percentage):
                 return .init(value: Double(percentage), representation: "percentage", unit: "percent", observedAt: nil)
-            case let .DexcomG5(_, voltageB, _, _, _):
+            case let .dexcom(_, _, voltageB, _, _, _):
                 return .init(
                     value: Double(voltageB * 10),
                     representation: "voltage",
@@ -234,7 +235,8 @@ enum XDripCGMMetadataBuilder {
                 sessionIdentifier: sessionIdentifier,
                 state: state,
                 type: sensorType,
-                model: model,
+                // Trio uses this description as well as transmitter.model. Keep the session identity unchanged.
+                model: isAnubis ? DexcomProductNameResolver.anubisTitle : model,
                 serialNumber: defaults.activeSensorSerialNumber,
                 startedAt: startDate?.timeIntervalSince1970,
                 warmupEndsAt: warmupEnd?.timeIntervalSince1970,
@@ -247,8 +249,12 @@ enum XDripCGMMetadataBuilder {
             return .init(glucoseAt: latestSharedGlucoseAt?.timeIntervalSince1970, qualityCode: qualityCode)
         }()
         let transmitterMetadata: XDripCGMMetadataEnvelope.Transmitter? = {
+            // The saved identifier can still belong to a previous local transmitter.
+            // Keep it for reconnection, but never attach it to follower data or a removed
+            // transmitter. This only omits optional metadata; legacy readings are unchanged.
+            guard defaults.isMaster, context.transmitter != nil else { return nil }
             let identifier = defaults.activeSensorTransmitterId
-            let transmitterModel = transmitterType?.detailedDescription()
+            let transmitterModel = isAnubis ? DexcomProductNameResolver.anubisTitle : (context.transmitter as? CGMLibre3Transmitter)?.productName ?? transmitterType?.detailedDescription()
             guard identifier != nil || transmitterModel != nil || battery != nil else { return nil }
             return .init(identifier: identifier, model: transmitterModel, battery: battery)
         }()
@@ -283,6 +289,7 @@ enum XDripCGMMetadataBuilder {
             if identifier.hasPrefix("DX01") { return "dexcom_stelo" }
             if identifier.hasPrefix("DX02") { return "dexcom_one_plus" }
             return "dexcom_g7"
+        case .Libre3: return "libre_3"
         case .Libre2: return "libre_2"
         case .miaomiao: return "libre_miaomiao"
         case .Bubble: return "libre_bubble"
@@ -306,7 +313,7 @@ enum XDripCGMMetadataBuilder {
     private static func directExpectedInterval(_ type: CGMTransmitterType?) -> Double? {
         switch type {
         case .dexcom, .dexcomG7: return 300
-        case .Libre2, .miaomiao, .Bubble, .medtrumTouchCareNano: return 60
+        case .Libre3, .Libre2, .miaomiao, .Bubble, .medtrumTouchCareNano: return 60
         case nil: return nil
         }
     }
@@ -320,6 +327,7 @@ enum XDripCGMMetadataBuilder {
     }
 
     private static func warmupDuration(transmitter: CGMTransmitter?, defaults: UserDefaults) -> TimeInterval {
+        if let minutes = transmitter?.sensorWarmupDurationInMinutes() { return minutes * 60 }
         if !defaults.isMaster,
            defaults.followerDataSourceType == .libreLinkUp || defaults.followerDataSourceType == .libreLinkUpRussia {
             return .minutes(ConstantsLibreLinkUp.sensorWarmUpRequiredInMinutesForLibre)
@@ -331,7 +339,7 @@ enum XDripCGMMetadataBuilder {
             return .minutes(transmitter?.isAnubisG6() == true
                 ? ConstantsMaster.minimumSensorWarmUpRequiredInMinutesDexcomG6Anubis
                 : ConstantsMaster.minimumSensorWarmUpRequiredInMinutesDexcomG5G6)
-        case .Libre2, .miaomiao, .Bubble, .medtrumTouchCareNano:
+        case .Libre3, .Libre2, .miaomiao, .Bubble, .medtrumTouchCareNano:
             return .minutes(ConstantsMaster.minimumSensorWarmUpRequiredInMinutes)
         case nil:
             let description = defaults.activeSensorDescription?.lowercased() ?? ""
@@ -421,7 +429,7 @@ public class LoopManager: NSObject {
         guard UserDefaults.standard.loopShareType != .disabled else { return }
 
         // Apply the active source policy before reading or writing the shared app group. Direct
-        // Medtrum Nano is always blocked; EasyView retains its explicit consent requirement.
+        // Medtrum Nano is always blocked. EasyView retains its explicit consent requirement.
         guard Self.osAidSharingPermitted else {
             glucoseData.removeAll()
             clearBlockedSourceSharedData()
@@ -666,19 +674,23 @@ public class LoopManager: NSObject {
         sensorState: String? = nil,
         clearSensorState: Bool = false
     ) {
-        guard !Bundle.main.disableLoopShare,
-              UserDefaults.standard.loopShareType == .trio
-        else { return }
-
-        if let lastCommunicationAt {
-            lastSuccessfulSourceCommunication = lastCommunicationAt
-        }
+        // Session changes still matter while sharing is disabled. In particular, a new
+        // sensor must clear the previous stop override before sharing can be enabled again.
         if clearSensorState {
             explicitSensorState = nil
         } else if let sensorState {
             explicitSensorState = sensorState
         }
 
+        guard !Bundle.main.disableLoopShare,
+              UserDefaults.standard.loopShareType == .trio
+        else { return }
+
+        if let lastCommunicationAt {
+            // Watch batches can arrive after a newer iPhone connection. Keep actual source
+            // contact moving forward, independently of the order in which collectors sync.
+            lastSuccessfulSourceCommunication = max(lastSuccessfulSourceCommunication ?? lastCommunicationAt, lastCommunicationAt)
+        }
         guard Self.osAidSharingPermitted else {
             glucoseData.removeAll()
             clearBlockedSourceSharedData()
@@ -760,11 +772,19 @@ public class LoopManager: NSObject {
 
     private func publishMetadata(sharedUserDefaults: UserDefaults, latestSharedGlucoseAt: Date?) {
         let defaults = UserDefaults.standard
+        let context = metadataContextProvider()
+        // Local stop/not-started overrides describe the absence of an active sensor.
+        // Reconcile on every publication, including reading, status and foreground updates.
+        // A new local session or follower source makes that override obsolete. This does not
+        // clear the transmitter's own stopped/failed state, nor infer recovery from glucose.
+        if context.activeSensor != nil || !defaults.isMaster {
+            explicitSensorState = nil
+        }
         let communicationAt = defaults.isMaster
             ? lastSuccessfulSourceCommunication ?? latestSharedGlucoseAt
             : lastSuccessfulSourceCommunication ?? defaults.timeStampOfLastFollowerConnection
         let envelope = XDripCGMMetadataBuilder.build(
-            context: metadataContextProvider(),
+            context: context,
             latestSharedGlucoseAt: latestSharedGlucoseAt,
             lastCommunicationAt: communicationAt,
             sensorStateOverride: explicitSensorState

@@ -44,7 +44,7 @@
 
 /// shown on top of the first settings screen, literally 'Settings'
 "settingsviews_settingstitle" = "Settings";
-"settingsviews_glucoseDisplaySectionTitle" = "Prikaz";
+"settingsviews_glucoseDisplaySectionTitle" = "Splošno";
 "settingsviews_glucoseRangesSectionTitle" = "Razponi glukoze";
 "settingsviews_alertsAndNotificationsSectionTitle" = "Alarmi in obvestila";
 "settingsviews_sharingAndServicesSectionTitle" = "Deljenje in storitve";
@@ -96,7 +96,6 @@
 "sectionTitleTrace" = "Issue Reporting";
 
 /// nightscout settings, where user can enable or disable nightscout
-"settingsviews_nightscoutEnabled" = "Enable Nightscout";
 
 /// user tries to send trace file but there's no native email account configured
 "emailNotConfigured" = "You must configure an e-mail account on your iOS device.";
@@ -128,8 +127,8 @@
 /// M5 stack bluetooth  settings, pop up that asks user to enter the password
 "m5stack_settingsviews_giveBluetoothPassword" = "Enter Bluetooth Password";
 
-/// nightscout settings, where user can select to use schedule or not
-"settingsviews_useSchedule" = "Use Upload Schedule";
+/* Enable the configured time schedule for uploads or spoken glucose readings. Does not enable the underlying feature; its master switch remains separate. */
+"settingsviews_enableSchedule" = "Omogoči urnik";
 
 /// transmitter settings, just the words that explain that the settings is about transmitter type
 "settingsviews_transmittertype" = "Transmitter Type";
@@ -209,7 +208,6 @@
 "settingsviews_labelShowReadingInAppBadge" = "Značka aplikacije";
 
 /// healthkit settings, literally 'healthkit'
-"settingsviews_healthkit" = "Piši v Apple Health";
 
 /// general settings, literally master
 "settingsviews_master" = "Master";
@@ -266,7 +264,6 @@
 "volumeTestSoundPlayerExplanation" = "An alarm sound is now being played with the same volume that will be used for an Alarm Type with 'Override Mute' = On\n\n(Used for all alarms except Missed Reading alerts which always use the iOS volume.)\n\nChange the volume with the volume buttons and press OK when done.";
 
 /// dexcom share settings, where user can select if readings should be uploaded to dexcom share yes or no
-"settingsviews_uploadReadingstoDexcomShare" = "Naloži";
 
 /// Apple Watch Settings - text in row where user needs to say if trend should be displayed or not
 "settingsviews_displayTrendInCalendarEvent" = "Trend";
@@ -299,7 +296,7 @@
 
 /// home screen settings, section title
 "settingsviews_sectiontitlehomescreen" = "Home Screen";
-"settingsviews_mainChartHours" = "Ure glavnega grafikona";
+"settingsviews_mainChartHours" = "Časovni razpon";
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////   Translation needed - remove this header after translation                       /////
@@ -319,10 +316,10 @@
 "settingsviews_sectiontitlestatistics" = "Statistics";
 
 /// statistics settings, use IFCC method for HbA1c?
-"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+"settingsviews_useIFCCGMI" = "GMI in mmols/mol";
 
 /// statistics settings, show statistics on home screen
-"settingsviews_showStatistics" = "Show Statistics";
+"settingsviews_showStatistics" = "Statistika";
 
 /// statistics settings, how many days to use for calculations
 "settingsviews_daysToUseStatisticsTitle" = "Days to Calculate";
@@ -332,7 +329,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 /// general settings, should the clock also be displayed when the screen is locked?
-"settingsviews_showClockWhenScreenIsLocked" = "Ura na zaklenjenem zaslonu";
+"settingsviews_showClockWhenScreenIsLocked" = "Ura";
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////   Translation needed - remove this header after translation                       /////
@@ -377,7 +374,7 @@
 "settingsviews_smallBolusTreatmentThresholdMessage" = "Below how many units should we consider a bolus as a micro-bolus?\n\n(Recommended value: 1.0U)";
 
 /// treatments settings, show the treatments on main chart
-"settingsviews_showTreatments" = "Show Treatments";
+"settingsviews_showTreatments" = "Terapija";
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////   Translation needed - remove this header after translation                       /////
@@ -480,8 +477,8 @@
 "settingsviews_SpeakIntervalMessage" = "Minimum interval between two voice announcements";
 
 /// home screen settings, should the mini-chart be shown
-"settingsviews_showMiniChart" = "Show Mini-Chart";
-"settingsviews_showSensorNoise" = "Show Sensor Noise";
+"settingsviews_showMiniChart" = "Mini graf";
+"settingsviews_showSensorNoise" = "Šum senzorja";
 
 /// data source settings, the name of the person we are following
 "settingsviews_followerPatientName" = "Vzdevek";
@@ -525,7 +522,7 @@
 "settingsviews_followerKeepAliveTypeNormalMessage" = "Ohranjanje aktivnosti is set to normal operation.\n\nWhen the app is not on screen, we will attempt to keep it running for you in the background so that BG updates are received and alarms can be triggered.\n\nThis mode has a noticeable impact on the battery of your device.";
 
 /// home screen settings, should the screen be dimmed when the screen is locked
-"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Zatemnitev zaklenjenega zaslona";
+"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Zatemnitev";
 
 /// Should loop data be shared only every 5 minutes
 
@@ -739,3 +736,93 @@
 "settingsviews_carPlayLiveActivityTypeChart" = "Graf";
 "settingsviews_carPlayLiveActivityTypeBasic" = "Osnovno";
 "settingsviews_liveActivitySectionTitle" = "Dejavnost v živo";
+"settingsviews_dexcomG7Message" = "Pustite ime Bluetooth prazno. Na naslednjem zaslonu tapnite Skeniraj za samodejno iskanje senzorja.\n\nČe je bil senzor že prikazan v Nastavitve > Bluetooth, lahko njegovo ime Bluetooth vnesete ročno.";
+
+// Local therapy estimates
+"therapy.carbDuration" = "Trajanje Ogljikovih Hidratov";
+"therapy.local" = "Izračunano lokalno";
+
+"settingsviews_showOriginalBGReadings" = "Izvirne vrednosti";
+
+"therapy.insulinType" = "Vrsta Inzulina";
+
+"therapy.showIOBCOB" = "IOB/COB";
+
+"therapy.treatmentSettings" = "Zdravljenja";
+
+"therapy.settingsHelp" = "Uporabljajo se za oceno preostalega inzulina in ogljikovih hidratov iz zabeleženih zdravljenj.";
+
+"therapy.settingsLocal" = "Te nastavitve ocenijo IOB in COB iz zabeleženih zdravljenj samo, ko teh vrednosti ne zagotavlja sistem AID.";
+"therapy.settingsExternal" = "Te možnosti so onemogočene, ker vaš sistem AID na osnovi %@ zagotavlja IOB in COB.";
+"therapy.settingsMixed" = "%@ zagotavlja IOB, zato je vrsta inzulina samodejna. Trajanje ogljikovih hidratov se uporablja za lokalno oceno COB iz zabeleženih obrokov.";
+"therapy.insulinModel" = "Izbran je inzulinski model %@. Trajanje delovanja inzulina (DIA): %@. Čas do največjega učinka inzulina: %@.";
+"therapy.carbFast" = "Hitrejša absorpcija ogljikovih hidratov. Vključuje 10-minutni zamik pred začetkom.";
+"therapy.carbNormal" = "Običajna absorpcija ogljikovih hidratov. Vključuje 10-minutni zamik pred začetkom.";
+"therapy.carbLong" = "Daljša absorpcija ogljikovih hidratov. Lahko je koristna, ko zdravila GLP-1 upočasnijo prebavo. Vključuje 10-minutni zamik pred začetkom.";
+"therapy.automatic" = "Samodejno";
+
+"therapy.liveActivityMetricsFooter" = "Prikaži razpoložljiva IOB in COB v veliki postavitvi zaklenjenega zaslona ter postavitvi z grafom CarPlay/Pametni sklad.";
+
+"therapy.liveActivityMetricsUnavailable" = "IOB/COB zahteva zabeležene odmerke inzulina ali ogljikovih hidratov ali podatke povezanega sistema AID.";
+
+"homeScreen.renderBasalDownwards" = "Prikaži bazal navzdol";
+
+/* Speech is enabled and allowed now; audio is not necessarily playing. */
+"speak.schedule.active" = "Aktivno";
+/* Speech remains enabled but is paused outside its daily schedule. */
+"speak.schedule.inactive" = "Neaktivno";
+
+/* Daily speech schedule section title. */
+"speak.schedule.section" = "Urnik";
+
+/* Start of the daily speech window; does not change the master switch. */
+"speak.schedule.start" = "Omogoči ob";
+
+/* End of the daily speech window; may be on the following day. */
+"speak.schedule.end" = "Onemogoči ob";
+
+/* The master speech switch and the daily schedule are separate. Shortcuts change only the master switch. */
+"speak.schedule.explanation" = "Ko je glasovno branje glukoze vklopljeno, se odčitki berejo samo v tem časovnem obdobju. Urnik se ponavlja vsak dan po lokalnem času telefona in lahko sega čez polnoč. Bližnjice spreminjajo samo glavno stikalo za glasovno branje glukoze.";
+
+/* Validation message when both speech schedule times are equal. */
+"speak.schedule.differentTimes" = "Izberite različna časa za omogočanje in onemogočanje.";
+"therapy.summary" = "Povzetek zdravljenja";
+"therapy.curves" = "Krivulje IOB/COB";
+"settingsviews_displayTrendInContactImage" = "Trend";
+"homeScreen.layout" = "Postavitev začetnega zaslona";
+"homeScreen.elapsed" = "Pretečeno";
+"homeScreen.remaining" = "Preostalo";
+"homeScreen.basalPosition" = "Položaj bazala";
+"homeScreen.basalTop" = "Zgoraj";
+"homeScreen.basalBottom" = "Spodaj";
+"settingsviews_homeScreenChartDisplaySectionTitle" = "Graf glukoze";
+
+"therapy.none" = "Brez";
+
+/* Treatment label thresholds. Only the bolus threshold also affects list classification. None disables label hiding. */
+"therapy.treatmentThresholds" = "Pragovi terapij";
+"therapy.smallBolusThreshold" = "Mali bolus";
+"therapy.smallCarbThreshold" = "Malo OH";
+"therapy.treatmentThresholdsExplanation" = "Vrednosti bolusov in OH pod pragovi so na grafu skrite. Prag bolusa določa tudi male boluse na seznamu terapij. «Brez» prikaže vse vrednosti.";
+
+"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+
+"settingsviews_statisticsEstimate" = "Ocena glukoze";
+
+/* Treatment marker sizing only. Standard keeps the existing ranges; Small Doses uses larger minimum markers. */
+"therapy.treatmentScale" = "Merilo terapij";
+"therapy.scaleStandard" = "Običajno";
+"therapy.scaleSmallDoses" = "Mali odm.";
+"therapy.treatmentScaleExplanation" = "Mali odmerki naredijo male oznake bolj vidne. Bolusi: 0.1–2.0U; OH: 1–50g. Večje količine uporabljajo največjo oznako.";
+
+/* Live Activity styles */
+"settingsviews_liveActivityTypeMinimal" = "Minimalno";
+"settingsviews_liveActivityTypeNormal" = "Običajno";
+"settingsviews_liveActivityTypeLarge" = "Veliko";
+
+/* Dexcom Share upload enable section heading */
+"settingsviews_dexcomShareUploadSectionTitle" = "Nalaganje v Dexcom Share";
+
+/* Speak Glucose wording and preview. */
+"speak.introduction" = "Izgovori uvod";
+"speak.preview" = "Preizkusi izgovor glukoze";

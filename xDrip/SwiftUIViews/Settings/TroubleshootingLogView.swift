@@ -8,9 +8,12 @@ import UIKit
 /// open screen live updates without exposing the store's mutable cache or file queue to the view.
 @MainActor
 final class TroubleshootingLogViewModel: ObservableObject {
-    @Published private(set) var entries = [TroubleshootingLogEntry]()
-    @Published private(set) var appInfo: TroubleshootingLogAppInfo
-    @Published private(set) var refreshedAt = Date()
+    @Published private(set) var report: TroubleshootingLogReportBuilder
+    @Published private(set) var reportText: String?
+
+    private let reportQueue = DispatchQueue(label: "com.faifly.xdrip.troubleshooting-report", qos: .userInitiated)
+    private var reloadInProgress = false
+    private var reloadRequested = false
 
     private let store: TroubleshootingLogStore
     private let appInfoProvider: () -> TroubleshootingLogAppInfo
@@ -22,9 +25,12 @@ final class TroubleshootingLogViewModel: ObservableObject {
     ) {
         self.store = store
         self.appInfoProvider = appInfoProvider
-        appInfo = appInfoProvider()
-        // `snapshot()` waits behind queued writes, so the first frame and every later reload see a
-        // complete history rather than racing an append that triggered the notification.
+        report = TroubleshootingLogReportBuilder(
+            entries: [], usesMgDl: UserDefaults.standard.bloodGlucoseUnitIsMgDl,
+            appInfo: appInfoProvider(), generatedAt: Date(), timeZone: .current
+        )
+        // Snapshotting waits behind queued store writes. Do that work and export formatting away
+        // from main so opening or resuming an overnight Activity Log cannot block scene updates.
         reload()
         changeObserver = NotificationCenter.default.addObserver(
             forName: .troubleshootingLogDidChange,
@@ -47,13 +53,35 @@ final class TroubleshootingLogViewModel: ObservableObject {
     }
 
     func reload() {
-        entries = store.snapshot()
-        // Cadence is read from the latest Core Data history once per reload. Keeping the resulting
-        // value in this main-actor snapshot avoids repeating a database query for every visible row.
-        appInfo = appInfoProvider()
-        // The header is intentionally fresh. Copy and Share should say when this exact snapshot was
-        // generated, not when the view model happened to be constructed.
-        refreshedAt = Date()
+        // Coalesce live updates while a report is being built. At most one follow-up snapshot is
+        // needed, and an older build must never overwrite a newer snapshot or its export text.
+        guard !reloadInProgress else {
+            reloadRequested = true
+            return
+        }
+        reloadInProgress = true
+        let store = store
+        // Configuration can query main-context Core Data, so capture it before crossing queues.
+        let appInfo = appInfoProvider()
+        let usesMgDl = UserDefaults.standard.bloodGlucoseUnitIsMgDl
+        let timeZone = TimeZone.current
+        reportQueue.async(execute: DispatchWorkItem { [weak self] in
+            let report = TroubleshootingLogReportBuilder(
+                entries: store.snapshot(), usesMgDl: usesMgDl, appInfo: appInfo,
+                generatedAt: Date(), timeZone: timeZone
+            )
+            let text = report.reportText
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.report = report
+                self.reportText = text
+                self.reloadInProgress = false
+                if self.reloadRequested {
+                    self.reloadRequested = false
+                    self.reload()
+                }
+            }
+        })
     }
 }
 
@@ -85,21 +113,44 @@ struct TroubleshootingLogView: View {
         _viewModel = StateObject(wrappedValue: TroubleshootingLogViewModel(
             store: store,
             appInfoProvider: {
-                // Read the current G5/G6 channel for each report snapshot. The effective accessor
-                // applies the default in memory without materializing it merely by opening this view.
-                let dexcomG5 = coreDataManager.flatMap { coreDataManager in
-                    BLEPeripheralAccessor(coreDataManager: coreDataManager)
+                // Read the complete active Dexcom context for each report snapshot. Both channel
+                // accessors apply their default in memory without materializing it merely by
+                // opening this view. G6 has no disposable sensor code, while G7-family sensors add
+                // the scanned code that was used for Primary authentication.
+                let dexcomContext = coreDataManager.flatMap { coreDataManager in
+                    let activePeripheral = BLEPeripheralAccessor(coreDataManager: coreDataManager)
                         .getBLEPeripherals()
-                        .first(where: { $0.shouldconnect && $0.dexcomG5 != nil })?
-                        .dexcomG5
+                        .first(where: { $0.shouldconnect && ($0.dexcomG5 != nil || $0.dexcomG7 != nil) })
+
+                    if let dexcomG5 = activePeripheral?.dexcomG5 {
+                        return TroubleshootingDexcomContext(
+                            useOtherApp: dexcomG5.useOtherApp,
+                            bluetoothChannel: TroubleshootingDexcomBluetoothChannel(
+                                dexcomG5.effectiveDexcomG6BluetoothSlot()
+                            ),
+                            sensorCode: nil,
+                            voltageA: Int(dexcomG5.voltageA),
+                            voltageB: Int(dexcomG5.voltageB),
+                            batteryFamily: .g5
+                        )
+                    }
+                    if let dexcomG7 = activePeripheral?.dexcomG7 {
+                        return TroubleshootingDexcomContext(
+                            useOtherApp: dexcomG7.useOtherApp,
+                            bluetoothChannel: TroubleshootingDexcomBluetoothChannel(
+                                dexcomG7.effectiveDexcomG7BluetoothSlot()
+                            ),
+                            sensorCode: dexcomG7.sensorCode,
+                            voltageA: Int(dexcomG7.voltageA),
+                            voltageB: Int(dexcomG7.voltageB),
+                            batteryFamily: .g7
+                        )
+                    }
+                    return nil
                 }
                 return .current(
                     currentSourceCanUseFiveMinuteReadings: bgPostProcessingManager?.currentSourceCanUseFiveMinuteReadings(),
-                    dexcomBluetoothChannel: dexcomG5.map {
-                        TroubleshootingDexcomBluetoothChannel(
-                            $0.effectiveDexcomG6BluetoothSlot()
-                        )
-                    }
+                    dexcomContext: dexcomContext
                 )
             }
         ))
@@ -115,7 +166,9 @@ struct TroubleshootingLogView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 16) {
-                    if report.entries.isEmpty {
+                    if viewModel.reportText == nil {
+                        ProgressView().frame(maxWidth: .infinity)
+                    } else if report.entries.isEmpty {
                         emptyState
                     } else if visibleDayGroups.isEmpty {
                         noResultsState
@@ -144,12 +197,14 @@ struct TroubleshootingLogView: View {
                 }
                 .tint(ConstantsAppColors.toolbarAction)
                 .accessibilityLabel(copied ? "Copied" : "Copy Troubleshooting Log")
+                .disabled(viewModel.reportText == nil)
 
-                ShareLink(item: report.reportText) {
+                ShareLink(item: viewModel.reportText ?? "") {
                     Image(systemName: "square.and.arrow.up")
                 }
                 .tint(ConstantsAppColors.toolbarAction)
                 .accessibilityLabel("Share Troubleshooting Log")
+                .disabled(viewModel.reportText == nil)
             }
         }
         .onAppear(perform: viewModel.reload)
@@ -157,7 +212,7 @@ struct TroubleshootingLogView: View {
 
     /// Lives outside the `ScrollView` so the user can always refine or clear the query, including
     /// when the submitted text matches no entries. Editing does not repeatedly rebuild a covered
-    /// list; the keyboard Search action applies the completed query and then reveals the results.
+    /// list. The keyboard Search action applies the completed query and then reveals the results.
     private var filterField: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
@@ -197,13 +252,7 @@ struct TroubleshootingLogView: View {
     /// list. `appInfo` is supplied even though it is export-only because Copy and Share place that
     /// context at the top of the plain text sent to support.
     private var report: TroubleshootingLogReportBuilder {
-        TroubleshootingLogReportBuilder(
-            entries: viewModel.entries,
-            usesMgDl: UserDefaults.standard.bloodGlucoseUnitIsMgDl,
-            appInfo: viewModel.appInfo,
-            generatedAt: viewModel.refreshedAt,
-            timeZone: .current
-        )
+        viewModel.report
     }
 
     private var emptyState: some View {
@@ -264,7 +313,9 @@ struct TroubleshootingLogView: View {
                     .padding(.bottom, 8)
             }
 
-            VStack(spacing: 0) {
+            // A day can contain thousands of readings. Keep its rows lazy as well as the outer
+            // day list so resuming this screen formats only the rows needed for the visible area.
+            LazyVStack(spacing: 0) {
                 ForEach(Array(group.entries.enumerated()), id: \.element.id) { index, entry in
                     troubleshootingRow(entry)
                     if index < group.entries.count - 1 {
@@ -339,7 +390,9 @@ struct TroubleshootingLogView: View {
         case .sensorNoise: return "waveform.path.ecg"
         case .sensorHealthAlert: return "exclamationmark.triangle.fill"
         case .transmitterReadSuccess: return "antenna.radiowaves.left.and.right"
-        case .calibrationAccepted: return "scope"
+        case let .dexcomBattery(_, status, _, _):
+            return dexcomBatterySystemName(status: status)
+        case .calibrationAccepted, .transmitterCalibration: return "scope"
         case let .alert(_, activity):
             return activity == .notificationsDenied || activity == .suppressedBySnooze || activity == .notificationDismissed || activity == .disabled ? "bell.slash.fill" : "bell.fill"
         case let .integration(.watch, activity):
@@ -347,7 +400,11 @@ struct TroubleshootingLogView: View {
             case .failed, .permissionDenied:
                 return "exclamationmark.applewatch"
             case .succeeded, .recovered:
-                return "checkmark.applewatch"
+                // The checked Watch symbol requires iOS 17. The event text still describes success on iOS 16.
+                if #available(iOS 17.0, *) {
+                    return "checkmark.applewatch"
+                }
+                return "applewatch"
             case .started, .noData, .restarted, .ended:
                 return "applewatch"
             }
@@ -358,6 +415,7 @@ struct TroubleshootingLogView: View {
             case .liveActivity: return "iphone"
             case .calendar: return "calendar"
             case .contactImage: return "person.crop.circle"
+            case .dexcomShareUpload, .dexcomShareUploadAccount: return "icloud.and.arrow.up"
             case .osAid: return "arrow.left.arrow.right"
             case .watch: return "applewatch"
             }
@@ -372,10 +430,13 @@ struct TroubleshootingLogView: View {
             case .dexcomBluetoothChannelChanged: return "antenna.radiowaves.left.and.right"
             case .therapySourceChanged: return "cross.case.fill"
             case .liveActivityChanged: return "iphone"
+            case .dexcomShareUploadChanged: return "icloud.and.arrow.up"
             case .aidFollowerChanged: return "waveform.path.ecg"
             case .patientAliasChanged: return "person.text.rectangle.fill"
             case .credentialChanged: return "key.fill"
+            case .followerVersionChanged: return "number.circle.fill"
             case .postProcessingSettings: return "waveform.path.ecg.rectangle"
+            case .heartbeatSubscriptionsChanged: return "antenna.radiowaves.left.and.right"
             }
         case let .dataManagement(activity):
             switch activity {
@@ -398,11 +459,33 @@ struct TroubleshootingLogView: View {
         }
     }
 
+    /// Uses the same modern battery symbols as the device details view while retaining its existing
+    /// fallback names for iOS 16. This keeps older supported phones readable instead of requesting
+    /// an SF Symbol that did not exist on their system version.
+    private func dexcomBatterySystemName(status: DexcomBatteryStatus) -> String {
+        if #available(iOS 17.0, *) {
+            switch status {
+            case .unknown, .red: return "battery.0percent"
+            case .yellow: return "battery.25percent"
+            case .green: return "battery.100percent"
+            }
+        }
+
+        switch status {
+        case .unknown, .red: return "minus.plus.batteryblock.slash"
+        case .yellow: return "minus.plus.batteryblock"
+        case .green: return "minus.plus.batteryblock.fill"
+        }
+    }
+
     private func color(for entry: TroubleshootingLogEntry) -> Color {
         switch entry.kind {
         case let .bluetooth(activity) where [.connectionFailed, .connectionTimedOut, .poweredOff, .unauthorized, .pairingFailed].contains(activity):
             return .orange
-        case let .cgm(_, activity) where [.nfcScanFailed, .nfcScanTimedOut, .nfcUnavailable].contains(activity):
+        case let .cgm(_, activity) where [
+            .nfcScanFailed, .nfcScanTimedOut, .nfcUnavailable, .authenticationFailed, .recoveryRequired,
+            .credentialsUnavailable, .accountLookupFailed, .sensorCheckRequired
+        ].contains(activity):
             return .orange
         case let .follower(_, activity) where activity == .loginFailed || activity == .downloadFailed:
             return .orange
@@ -421,15 +504,29 @@ struct TroubleshootingLogView: View {
             case .bad: return ConstantsAppColors.urgent
             case nil: return ConstantsAppColors.navigationTint
             }
+        case let .transmitterCalibration(activity):
+            switch activity {
+            case .processing, .completedHigh: return ConstantsAppColors.normal
+            case .completedLow: return ConstantsAppColors.caution
+            case .rejected, .notPermitted: return ConstantsAppColors.urgent
+            }
+        case let .dexcomBattery(_, status, _, _):
+            switch status {
+            case .unknown: return ConstantsAppColors.navigationTint
+            case .green: return ConstantsAppColors.normal
+            case .yellow: return ConstantsAppColors.caution
+            case .red: return ConstantsAppColors.urgent
+            }
         default:
             return ConstantsAppColors.navigationTint
         }
     }
 
     private func copyReport() {
-        // Do not reconstruct text for the pasteboard. `reportText` is the parity contract shared with
-        // `ShareLink`, including every retained entry, the export-only header and empty-state wording.
-        UIPasteboard.general.string = report.reportText
+        // Copy and Share use the same complete text prepared with the visible snapshot. Neither
+        // action should format thousands of retained entries synchronously on the main thread.
+        guard let text = viewModel.reportText else { return }
+        UIPasteboard.general.string = text
         copied = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             copied = false
@@ -437,7 +534,7 @@ struct TroubleshootingLogView: View {
     }
 }
 
-/// Lightweight presentation grouping only; it is never persisted as a second history format.
+/// Lightweight presentation grouping only. It is never persisted as a second history format.
 private struct TroubleshootingLogDayGroup: Identifiable {
     let day: Date
     var entries: [TroubleshootingLogEntry]

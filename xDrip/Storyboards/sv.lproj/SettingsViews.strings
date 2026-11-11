@@ -1,5 +1,5 @@
 "settingsviews_settingstitle" = "Inställningar";
-"settingsviews_glucoseDisplaySectionTitle" = "Visning";
+"settingsviews_glucoseDisplaySectionTitle" = "Allmänt";
 "settingsviews_glucoseRangesSectionTitle" = "Glukosintervall";
 "settingsviews_alertsAndNotificationsSectionTitle" = "Larm och notiser";
 "settingsviews_sharingAndServicesSectionTitle" = "Delning och tjänster";
@@ -20,7 +20,7 @@
 "settingsviews_showReadingInNotification" = "Glukosnotiser";
 "settingsviews_labelShowReadingInAppBadge" = "Appbricka";
 "settingsviews_multipleAppBadgeValueWith10" = "Appbricka x10";
-"settingsviews_showClockWhenScreenIsLocked" = "Klocka på låsskärm";
+"settingsviews_showClockWhenScreenIsLocked" = "Klocka";
 "settingsviews_urgentHighValue" = "Akut högt värde";
 "settingsviews_highValue" = "Högt värde";
 "settingsviews_targetValue" = "Målvärde";
@@ -29,14 +29,14 @@
 "settingsviews_showcoloredobjectives" = "Färgade linjer";
 "settingsviews_showtarget" = "Mållinje";
 "settingsviews_sectiontitletreatments" = "Behandlingar";
-"settingsviews_showTreatments" = "Visa behandlingar i diagram";
+"settingsviews_showTreatments" = "Behandling";
 "settingsviews_smallBolusTreatmentThreshold" = "Tröskelvärde för mikrobolus";
 "settingsviews_smallBolusTreatmentThresholdMessage" = "Under vilket värde ska det visas som en mikrobolus?\n\n(Rekommenderat värde: 1,0 IE)";
 "settingsviews_sectiontitlestatistics" = "Statistik";
-"settingsviews_showStatistics" = "Visa statistik";
+"settingsviews_showStatistics" = "Statistik";
 "settingsviews_daysToUseStatisticsTitle" = "Dagar att beräkna";
 "settingsviews_daysToUseStatisticsMessage" = "Maximalt antal dagar för beräkning av statistik?\n\n(ange 0 för beräkning sedan midnatt)";
-"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+"settingsviews_useIFCCGMI" = "GMI in mmols/mol";
 "settingsviews_sectiontitletransmitter" = "Sändare";
 "settingsviews_transmittertype" = "Typ av sändare";
 "settingsviews_transmitterid" = "Sändar-ID";
@@ -57,9 +57,7 @@
 "settingsviews_alert_types_section_footer" = "Larmtyper definierar hur larm beter sig, inklusive ljud, vibration, snooze och åsidosättning av tyst läge.";
 "settingsviews_alerts_section_footer" = "Larm definierar när appen ska meddela dig om glukosnivåer, saknade avläsningar och andra tillstånd.";
 "settingsviews_sectiontitlehealthkit" = "Apple Hälsa";
-"settingsviews_healthkit" = "Skriv till Apple Hälsa";
 "settingsviews_sectiontitledexcomshareupload" = "Dexcom Share";
-"settingsviews_uploadReadingstoDexcomShare" = "Ladda upp";
 "settingsviews_dexcomShareUploadSerialNumber" = "Sändarens serienummer";
 "settingsviews_useUSDexcomShareurl" = "US-servrar";
 "settingsviews_dexcomShareAccountName" = "Användarnamn";
@@ -68,9 +66,9 @@
 "settingsviews_givedexcomShareUploadSerialNumber" = "Ange Dexcom mottagares serienummer";
 "settingsviews_sectiontitlenightscout" = "Nightscout";
 "settingsviews_nightscoutUploadOptionsSectionTitle" = "Uppladdningsalternativ";
-"settingsviews_nightscoutEnabled" = "Slå på Nightscout";
 "settingsviews_nightscoutUrl" = "URL";
-"settingsviews_useSchedule" = "Använd schemalagd uppladdning";
+/* Enable the configured time schedule for uploads or spoken glucose readings. Does not enable the underlying feature; its master switch remains separate. */
+"settingsviews_enableSchedule" = "Aktivera schema";
 "schedule" = "Schema";
 "settingsviews_giveNightscoutUrl" = "Ange din Nightscout URL";
 "settingsviews_nightscoutAPIKey" = "API_SECRET";
@@ -123,7 +121,7 @@
 "nslog" = "NSLog";
 "oslog" = "OSLog";
 "settingsviews_sectiontitlehomescreen" = "Hemskärm";
-"settingsviews_mainChartHours" = "Timmar i huvuddiagrammet";
+"settingsviews_mainChartHours" = "Tidsintervall";
  
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,8 +251,8 @@
 "settingsviews_SpeakIntervalMessage" = "Minimum interval between two voice announcements";
 
 /// home screen settings, should the mini-chart be shown
-"settingsviews_showMiniChart" = "Show Mini-Chart";
-"settingsviews_showSensorNoise" = "Show Sensor Noise";
+"settingsviews_showMiniChart" = "Minidiagram";
+"settingsviews_showSensorNoise" = "Sensorbrus";
 
 /// data source settings, the name of the person we are following
 "settingsviews_followerPatientName" = "Alias";
@@ -298,7 +296,7 @@
 "settingsviews_followerKeepAliveTypeNormalMessage" = "Håll aktiv is set to normal operation.\n\nWhen the app is not on screen, we will attempt to keep it running for you in the background so that BG updates are received and alarms can be triggered.\n\nThis mode has a noticeable impact on the battery of your device.";
 
 /// home screen settings, should the screen be dimmed when the screen is locked
-"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Dämpning på låsskärm";
+"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Nedtoning";
 
 /// Should loop data be shared only every 5 minutes
 
@@ -512,3 +510,93 @@
 "settingsviews_carPlayLiveActivityTypeChart" = "Diagram";
 "settingsviews_carPlayLiveActivityTypeBasic" = "Grundläggande";
 "settingsviews_liveActivitySectionTitle" = "Liveaktivitet";
+"settingsviews_dexcomG7Message" = "Lämna Bluetooth-namnet tomt. På nästa skärm trycker du på Skanna för att automatiskt söka efter sensorn.\n\nOm sensorn tidigare har visats under Inställningar > Bluetooth kan du ange dess Bluetooth-namn manuellt.";
+
+// Local therapy estimates
+"therapy.carbDuration" = "Kolhydratduration";
+"therapy.local" = "Beräknat lokalt";
+
+"settingsviews_showOriginalBGReadings" = "Ursprungliga värden";
+
+"therapy.insulinType" = "Insulintyp";
+
+"therapy.showIOBCOB" = "IOB/COB";
+
+"therapy.treatmentSettings" = "Behandlingar";
+
+"therapy.settingsHelp" = "Används för att uppskatta kvarvarande insulin och kolhydrater från registrerade behandlingar.";
+
+"therapy.settingsLocal" = "Dessa inställningar uppskattar IOB och COB från registrerade behandlingar endast när värdena inte tillhandahålls av ett AID-system.";
+"therapy.settingsExternal" = "Dessa alternativ är inaktiverade eftersom ditt %@-baserade AID-system tillhandahåller IOB och COB.";
+"therapy.settingsMixed" = "%@ tillhandahåller IOB, så insulintypen är automatisk. Kolhydratdurationen uppskattar COB lokalt från registrerade måltider.";
+"therapy.insulinModel" = "Insulinmodell %@ vald. Insulinets verkningstid (DIA): %@. Tid till maximal insulinverkan: %@.";
+"therapy.carbFast" = "Snabbare kolhydratupptag. Inkluderar 10 minuters fördröjning innan upptaget börjar.";
+"therapy.carbNormal" = "Normalt kolhydratupptag. Inkluderar 10 minuters fördröjning innan upptaget börjar.";
+"therapy.carbLong" = "Längre kolhydratupptag. Kan vara användbart när GLP-1-läkemedel bromsar matsmältningen. Inkluderar 10 minuters fördröjning innan upptaget börjar.";
+"therapy.automatic" = "Automatiskt";
+
+"therapy.liveActivityMetricsFooter" = "Visa tillgängligt IOB och COB i den stora låsskärmslayouten och i diagramlayouten för CarPlay/Smart trave.";
+
+"therapy.liveActivityMetricsUnavailable" = "IOB/COB kräver registrerade insulin- eller kolhydratbehandlingar, eller data från ett anslutet AID-system.";
+
+"homeScreen.renderBasalDownwards" = "Visa basal nedåt";
+
+/* Speech is enabled and allowed now; audio is not necessarily playing. */
+"speak.schedule.active" = "Aktiv";
+/* Speech remains enabled but is paused outside its daily schedule. */
+"speak.schedule.inactive" = "Inaktiv";
+
+/* Daily speech schedule section title. */
+"speak.schedule.section" = "Schema";
+
+/* Start of the daily speech window; does not change the master switch. */
+"speak.schedule.start" = "Aktivera kl.";
+
+/* End of the daily speech window; may be on the following day. */
+"speak.schedule.end" = "Inaktivera kl.";
+
+/* The master speech switch and the daily schedule are separate. Shortcuts change only the master switch. */
+"speak.schedule.explanation" = "När uppläsning av glukos är på läses värden endast upp under dessa tider. Schemat upprepas dagligen enligt telefonens lokala tid och kan sträcka sig över midnatt. Genvägar ändrar endast reglaget för uppläsning av glukos.";
+
+/* Validation message when both speech schedule times are equal. */
+"speak.schedule.differentTimes" = "Välj olika tider för aktivering och inaktivering.";
+"therapy.summary" = "Behandlingsöversikt";
+"therapy.curves" = "IOB/COB-kurvor";
+"settingsviews_displayTrendInContactImage" = "Trend";
+"homeScreen.layout" = "Hemskärmens layout";
+"homeScreen.elapsed" = "Förfluten";
+"homeScreen.remaining" = "Återstående";
+"homeScreen.basalPosition" = "Basalplacering";
+"homeScreen.basalTop" = "Överst";
+"homeScreen.basalBottom" = "Nederst";
+"settingsviews_homeScreenChartDisplaySectionTitle" = "Glukosdiagram";
+
+"therapy.none" = "Av";
+
+/* Treatment label thresholds. Only the bolus threshold also affects list classification. None disables label hiding. */
+"therapy.treatmentThresholds" = "Behandlingsgränser";
+"therapy.smallBolusThreshold" = "Liten bolus";
+"therapy.smallCarbThreshold" = "Lite kolh.";
+"therapy.treatmentThresholdsExplanation" = "Bolus- och kolhydratvärden under gränserna döljs i grafen. Bolusgränsen definierar även små bolus i behandlingslistan. «Av» visar alla värden.";
+
+"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+
+"settingsviews_statisticsEstimate" = "Glukosuppskattning";
+
+/* Treatment marker sizing only. Standard keeps the existing ranges; Small Doses uses larger minimum markers. */
+"therapy.treatmentScale" = "Terapiskala";
+"therapy.scaleStandard" = "Standard";
+"therapy.scaleSmallDoses" = "Små doser";
+"therapy.treatmentScaleExplanation" = "Små doser gör små markörer tydligare. Bolusmarkörer skalas från 0.1–2.0U och kolhydratmarkörer från 1–50g. Större mängder använder den största markören.";
+
+/* Live Activity styles */
+"settingsviews_liveActivityTypeMinimal" = "Minimal";
+"settingsviews_liveActivityTypeNormal" = "Normal";
+"settingsviews_liveActivityTypeLarge" = "Stor";
+
+/* Dexcom Share upload enable section heading */
+"settingsviews_dexcomShareUploadSectionTitle" = "Uppladdning till Dexcom Share";
+
+/* Speak Glucose wording and preview. */
+"speak.introduction" = "Läs upp inledning";
+"speak.preview" = "Testa glukosuppläsning";

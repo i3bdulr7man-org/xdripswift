@@ -1,5 +1,5 @@
 "settingsviews_settingstitle" = "Settings";
-"settingsviews_glucoseDisplaySectionTitle" = "Display";
+"settingsviews_glucoseDisplaySectionTitle" = "General";
 "settingsviews_glucoseRangesSectionTitle" = "Glucose Ranges";
 "settingsviews_glucoseRangesSectionFooter" = "Glucose Ranges only affect the main chart display colours. They are not related to Alarm values.";
 "settingsviews_alertsAndNotificationsSectionTitle" = "Alerts and Notifications";
@@ -56,19 +56,19 @@
 "settingsviews_IntervalMessage" = "Minimum interval between two notifications";
 "settingsviews_liveActivityDisabledInFollowerModeMessage" = "Live Activities are disabled in Follower Mode unless an external heartbeat is used for Keep-alive.";
 "settingsviews_allowScreenRotation" = "Chart Rotation";
-"settingsviews_homeScreenChartDisplaySectionTitle" = "Chart Display";
+"settingsviews_homeScreenChartDisplaySectionTitle" = "Glucose Chart";
 "settingsviews_homeScreenMainChartSectionFooter" = "These options control how glucose data is displayed on the main chart.";
-"settingsviews_mainChartHours" = "Main Chart Hours";
+"settingsviews_mainChartHours" = "Time Range";
 "settingsviews_homeScreenScreenLockSectionTitle" = "Screen Lock";
 "settingsviews_homeScreenScreenLockSectionFooter" = "These options control how the Home screen behaves when the app is left open or locked.";
-"settingsviews_showClockWhenScreenIsLocked" = "Lock Screen Clock";
-"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Lock Screen Dimming";
+"settingsviews_showClockWhenScreenIsLocked" = "Clock";
+"settingsviews_screenLockDimmingTypeWhenScreenIsLocked" = "Dimming";
 "settingsviews_screenLockDimmingTypeDisabled" = "Disabled";
 "settingsviews_screenLockDimmingTypeDimmed" = "Dimmed";
 "settingsviews_screenLockDimmingTypeDark" = "Dark";
 "settingsviews_screenLockDimmingTypeVeryDark" = "Very Dark";
 "settingsviews_showOriginalBGReadings" = "Original Values";
-"settingsviews_showSensorNoise" = "Show Sensor Noise";
+"settingsviews_showSensorNoise" = "Sensor Noise";
 "settingsviews_sensorHealthNotifications" = "Sensor Health Warnings";
 "settingsviews_sensorHealthNotificationsFooter" = "Controls optional system notifications for prolonged sensor noise, a flat signal and temporary sensor issues. Sensor/Transmitter Failure is configured with the other alarms. The dismissible Home banner remains available.";
 "settingsviews_urgentHighValue" = "Urgent High Value";
@@ -84,17 +84,17 @@
 "settingsviews_showcoloredobjectives" = "Colored Lines";
 "settingsviews_showtarget" = "Target Line";
 "settingsviews_sectiontitletreatments" = "Treatments";
-"settingsviews_showTreatments" = "Show Treatments";
+"settingsviews_showTreatments" = "Therapy";
 "settingsviews_smallBolusTreatmentThresholdMessage" = "Below how many units should we consider a bolus as a micro-bolus?\n\n(Recommended value: 1.0U)";
 "settingsviews_sectiontitlestatistics" = "Statistics";
-"settingsviews_showStatistics" = "Show Statistics";
+"settingsviews_showStatistics" = "Statistics";
 "settingsviews_daysToUseStatisticsTitle" = "Days to Calculate";
 "settingsviews_daysToUseStatisticsMessage" = "Maximum days we should try to use to calculate the statistics?\n\n(Enter 0 to calculate today since midnight)";
 "settingsviews_labelTimeInRangeType" = "Time In Range";
 "settingsviews_timeInRangeTypeStandardRange" = "Standard";
 "settingsviews_timeInRangeTypeTightRange" = "Tight Range";
 "settingsviews_timeInRangeTypeUserDefinedRange" = "User Range";
-"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+"settingsviews_useIFCCGMI" = "GMI in mmols/mol";
 "settingsviews_sectiontitletransmitter" = "Transmitter";
 "settingsviews_transmittertype" = "Transmitter Type";
 "settingsviews_transmitterid" = "Transmitter ID";
@@ -116,9 +116,7 @@
 "settingsviews_alerts_section_footer" = "Alarms define when the app should notify you for glucose levels, missed readings and other conditions.";
 "settingsviews_prefer_large_snooze_screen" = "Large Snooze Screen";
 "settingsviews_sectiontitlehealthkit" = "Apple Health";
-"settingsviews_healthkit" = "Write to Apple Health";
 "settingsviews_sectiontitledexcomshareupload" = "Dexcom Share";
-"settingsviews_uploadReadingstoDexcomShare" = "Upload";
 "settingsviews_dexcomShareUploadSerialNumber" = "Receiver Serial Number";
 "settingsviews_useUSDexcomShareurl" = "US Servers";
 "settingsviews_dexcomShareAccountName" = "Account Name";
@@ -127,9 +125,9 @@
 "settingsviews_givedexcomShareUploadSerialNumber" = "Enter the Dexcom Receiver Serial Number";
 "settingsviews_sectiontitlenightscout" = "Nightscout";
 "settingsviews_nightscoutUploadOptionsSectionTitle" = "Upload Options";
-"settingsviews_nightscoutEnabled" = "Enable Nightscout";
 "settingsviews_nightscoutUrl" = "URL";
-"settingsviews_useSchedule" = "Use Upload Schedule";
+/* Enable the configured time schedule for uploads or spoken glucose readings. Does not enable the underlying feature; its master switch remains separate. */
+"settingsviews_enableSchedule" = "Enable Schedule";
 "schedule" = "Schedule";
 "settingsviews_giveNightscoutUrl" = "Enter your Nightscout URL";
 "settingsviews_nightscoutAPIKey" = "API_SECRET";
@@ -167,8 +165,7 @@
 "settingsviews_CalenderIntervalMessage" = "Minimum interval between two calendar events";
 "settingsviews_infoContactsAccessRestricted" = "You cannot give authorization to %@ to access your contacts. This is possibly due to active restrictions such as parental controls being in place.";
 "settingsviews_contactImageSectionTitle" = "Contact Image";
-"settingsviews_enableContactImage" = "Contact Image";
-"settingsviews_displayTrendInContactImage" = "Show Trend";
+"settingsviews_displayTrendInContactImage" = "Trend";
 "settingsviews_contactImageCreatedByString" = "Contact automatically created by";
 "sectionTitleTrace" = "Issue Reporting";
 "sendTraceFile" = "Send Issue Report";
@@ -455,3 +452,103 @@
 "settingsviews_carPlayLiveActivityTypeChart" = "Chart";
 "settingsviews_carPlayLiveActivityTypeBasic" = "Basic";
 "settingsviews_liveActivitySectionTitle" = "Live Activity";
+"settingsviews_dexcomG7Message" = "Leave the Bluetooth name empty. On the next screen, tap Scan to search for the sensor automatically.\n\nIf the sensor has previously appeared in Settings > Bluetooth, you can enter its Bluetooth name manually.";
+
+// Local therapy estimates
+"therapy.carbDuration" = "Carb Duration";
+"therapy.local" = "Calculated locally";
+
+"therapy.insulinType" = "Insulin Type";
+
+"therapy.showIOBCOB" = "IOB/COB";
+
+"therapy.treatmentSettings" = "Treatments";
+
+"therapy.settingsHelp" = "Used to estimate remaining insulin and carbs from your recorded treatments.";
+
+"therapy.settingsLocal" = "These settings are used to estimate IOB and COB from recorded treatments only when the values are not supplied by an AID system.";
+"therapy.settingsExternal" = "These options are disabled because IOB and COB are provided by your %@-based AID system.";
+"therapy.settingsMixed" = "IOB is provided by %@, so Insulin Type is automatic. Carb Duration is used to estimate COB locally from recorded meals.";
+"therapy.insulinModel" = "%@ insulin model selected. Duration of Insulin Action (DIA): %@. Insulin Peak Time: %@.";
+"therapy.carbFast" = "Faster carbohydrate absorption. Includes a 10-minute delay before absorption begins.";
+"therapy.carbNormal" = "Normal carbohydrate absorption. Includes a 10-minute delay before absorption begins.";
+"therapy.carbLong" = "Longer carbohydrate absorption. May be useful when GLP-1 medication slows digestion. Includes a 10-minute delay before absorption begins.";
+"therapy.automatic" = "Automatic";
+
+"therapy.liveActivityMetricsFooter" = "Show available IOB and COB in the Large Lock Screen layout and the CarPlay/Smart Stack Chart layout.";
+
+"therapy.liveActivityMetricsUnavailable" = "IOB/COB requires recorded insulin or carbohydrate treatments, or data from a connected AID system.";
+
+"homeScreen.renderBasalDownwards" = "Render Basal Downwards";
+
+/* Speech is enabled and allowed now; audio is not necessarily playing. */
+"speak.schedule.active" = "Active";
+/* Speech remains enabled but is paused outside its daily schedule. */
+"speak.schedule.inactive" = "Inactive";
+
+/* Daily speech schedule section title. */
+"speak.schedule.section" = "Schedule";
+
+/* Start of the daily speech window; does not change the master switch. */
+"speak.schedule.start" = "Enable at";
+
+/* End of the daily speech window; may be on the following day. */
+"speak.schedule.end" = "Disable at";
+
+/* The master speech switch and the daily schedule are separate. Shortcuts change only the master switch. */
+"speak.schedule.explanation" = "When Speak Glucose is on, readings are spoken only within these hours. The schedule repeats daily in your phone’s local time and can cross midnight. Shortcuts change only the Speak Glucose switch.";
+
+/* Validation message when both speech schedule times are equal. */
+"speak.schedule.differentTimes" = "Choose different enable and disable times.";
+"therapy.summary" = "Therapy Summary";
+"therapy.curves" = "IOB/COB Curves";
+"settingsviews_showMiniChart" = "Mini-Chart";
+"homeScreen.layout" = "Home Layout";
+"homeScreen.elapsed" = "Elapsed";
+"homeScreen.remaining" = "Remaining";
+"homeScreen.basalPosition" = "Basal Position";
+"homeScreen.basalTop" = "Top";
+"homeScreen.basalBottom" = "Bottom";
+
+"therapy.none" = "None";
+
+/* Treatment label thresholds. Only the bolus threshold also affects list classification. None disables label hiding. */
+"therapy.treatmentThresholds" = "Treatment Thresholds";
+"therapy.smallBolusThreshold" = "Small Bolus";
+"therapy.smallCarbThreshold" = "Small Carbs";
+"therapy.treatmentThresholdsExplanation" = "Bolus and carb values below these thresholds are hidden on the chart. The bolus threshold also defines small boluses in the treatments list. None shows all labels.";
+
+"settingsviews_useIFCCA1C" = "HbA1c in mmols/mol";
+
+"settingsviews_statisticsEstimate" = "Glucose Estimate";
+
+/* Treatment marker sizing only. Standard keeps the existing ranges; Small Doses uses larger minimum markers. */
+"therapy.treatmentScale" = "Treatment Scale";
+"therapy.scaleStandard" = "Standard";
+"therapy.scaleSmallDoses" = "Small Doses";
+"therapy.treatmentScaleExplanation" = "Small Doses makes small treatment markers easier to see. Bolus markers scale from 0.1–2.0U and carb markers from 1–50g. Higher amounts use the largest marker.";
+
+/* Dexcom Share upload connection and activity */
+"settingsviews_dexcomShareUploadSectionTitle" = "Dexcom Share Upload";
+"settingsviews_shareUploadAccountVerified" = "Account verified";
+"settingsviews_shareUploadUnchecked" = "Not checked";
+"settingsviews_shareUploadPaused" = "Paused by schedule";
+"settingsviews_shareUploadLocalOnly" = "Uploading to Dexcom Share is only available with a local glucose source.";
+"settingsviews_shareUploadCheckFooter" = "Test Connection verifies your account. The receiver serial number is verified when readings are uploaded.";
+"settingsviews_shareUploadLastConnection" = "Last successful connection";
+"settingsviews_shareUploadLastUpload" = "Last successful upload";
+"settingsviews_shareUploadError" = "Upload error";
+"settingsviews_shareUploadNever" = "Not yet";
+"settingsviews_shareUploadReceiverNotAssigned" = "This receiver is not assigned to your Dexcom account. Register it using the official Dexcom app.";
+"settingsviews_shareUploadConfigurationRequired" = "Enter your username, password and receiver serial number.";
+"settingsviews_shareUploadFailed" = "Upload failed";
+"settingsviews_shareUploadTooLarge" = "Dexcom Share rejected an oversized upload.";
+
+/* Live Activity styles */
+"settingsviews_liveActivityTypeMinimal" = "Minimal";
+"settingsviews_liveActivityTypeNormal" = "Normal";
+"settingsviews_liveActivityTypeLarge" = "Large";
+
+/* Speak Glucose wording and preview. */
+"speak.introduction" = "Speak Introduction";
+"speak.preview" = "Preview Speak Glucose";
